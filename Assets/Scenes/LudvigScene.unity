@@ -294,7 +294,7 @@ MonoBehaviour:
   size: 2
   voxelResolution: 8
   chunkResolution: 2
-  voxelGridPrefab: {fileID: 114045010269299772, guid: 7fc2da65f8988c34c81ed188ac41ff00,
+  voxelChunkPrefab: {fileID: 114045010269299772, guid: 7fc2da65f8988c34c81ed188ac41ff00,
     type: 2}
 --- !u!4 &1636806256
 Transform:
