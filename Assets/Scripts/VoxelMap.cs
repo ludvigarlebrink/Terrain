@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class VoxelMap : MonoBehaviour
 {
@@ -9,9 +7,9 @@ public class VoxelMap : MonoBehaviour
     public int voxelResolution = 8;
     public int chunkResolution = 2;
 
-    public VoxelChunk voxelGridPrefab;
+    public VoxelChunk voxelChunkPrefab;
 
-    private VoxelChunk[] chunks;
+    private VoxelChunk[] voxelChunks;
 
     private float chunkSize, voxelSize, halfSize;
 
@@ -21,7 +19,7 @@ public class VoxelMap : MonoBehaviour
         chunkSize = size / chunkResolution;
         voxelSize = chunkSize / voxelResolution;
 
-        chunks = new VoxelChunk[chunkResolution * chunkResolution];
+        voxelChunks = new VoxelChunk[chunkResolution * chunkResolution];
         for (int i = 0, y = 0; y < chunkResolution; y++)
         {
             for (int x = 0; x < chunkResolution; x++, i++)
@@ -29,14 +27,39 @@ public class VoxelMap : MonoBehaviour
                 CreateChunk(i, x, y);
             }
         }
+
+        BoxCollider box = gameObject.AddComponent<BoxCollider>();
+        box.size = new Vector3(size, size);
+    }
+
+    private void Update()
+    {
+        if (Input.GetMouseButton(0))
+        {
+            RaycastHit hitInfo;
+            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo))
+            {
+                if (hitInfo.collider.gameObject == gameObject)
+                {
+                    EditVoxels(transform.InverseTransformPoint(hitInfo.point));
+                }
+            }
+        }
+    }
+
+    private void EditVoxels(Vector3 point)
+    {
+        int voxelX = (int)(point.x / voxelSize);
+        int voxelY = (int)(point.y / voxelSize);
+        Debug.Log(voxelX + ", " + voxelY);
     }
 
     private void CreateChunk(int i, int x, int y)
     {
-        VoxelChunk chunk = Instantiate(voxelGridPrefab) as VoxelChunk;
+        VoxelChunk chunk = Instantiate(voxelChunkPrefab) as VoxelChunk;
         chunk.Initialize(voxelResolution, chunkSize);
         chunk.transform.parent = transform;
         chunk.transform.localPosition = new Vector3(x * chunkSize - halfSize, y * chunkSize - halfSize);
-        chunks[i] = chunk;
+        voxelChunks[i] = chunk;
     }
 }
