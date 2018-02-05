@@ -10,7 +10,6 @@ public class MarchingCubes : MonoBehaviour
     public float zoomSpeed = 15.0f;
 
     public Vector3 offset = new Vector3(0, 0, 0);
-
     #endregion
 
     #region Private Variables
@@ -48,7 +47,6 @@ public class MarchingCubes : MonoBehaviour
         GetComponent<MeshFilter>().mesh = mesh;
 
         Initialize();
-
         CreateChunk();
     }
 
@@ -218,7 +216,7 @@ public class MarchingCubes : MonoBehaviour
                     if ((bits & 64) != 0)
                     {
                         mu = (isolevel - value6) / (value7 - value6);
-                        vertexList[6] = LerpSelf(voxels[(int)pointXZ], voxels[(int)pointXYZ], mu);
+                        vertexList[6] = LerpSelf(voxels[(int)pointYZ], voxels[(int)pointXYZ], mu);
                     }
 
                     if ((bits & 128) != 0)
@@ -251,7 +249,7 @@ public class MarchingCubes : MonoBehaviour
                         vertexList[11] = LerpSelf(voxels[(int)pointY], voxels[(int)pointYZ], mu);
                     }
 
-                    cubeIndex *= 16;
+                    cubeIndex <<= 4;
 
                     int i = 0;
                     while (TrisTable.TriTable[cubeIndex + i] != -1)
@@ -287,7 +285,6 @@ public class MarchingCubes : MonoBehaviour
                         i += 3;
                     }
                 }
-
             }
         }
         
@@ -304,7 +301,6 @@ public class MarchingCubes : MonoBehaviour
         //    geometry.Optimize();
         // update mesh collider (if needed?)
         GetComponent<MeshCollider>().sharedMesh = mesh;
-
 
         vertices.Clear();
         uvs.Clear();
