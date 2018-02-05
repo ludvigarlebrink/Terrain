@@ -15,6 +15,10 @@ public class VoxelMap : MonoBehaviour
     private float voxelSize;
     private float halfSize;
 
+    private static string[] fillTypeNames = { "Filled", "Empty" };
+    private int fillTypeIndex;
+
+    #region Private Methods
     private void Awake()
     {
         halfSize = size * 0.5f;
@@ -58,6 +62,7 @@ public class VoxelMap : MonoBehaviour
         voxelX -= chunkX * voxelResolution;
         voxelY -= chunkY * voxelResolution;
         VoxelStencil activeStencil = new VoxelStencil();
+        activeStencil.Initialize(fillTypeIndex == 0);
         voxelChunks[chunkY * chunkResolution + chunkX].Apply(voxelX, voxelY, activeStencil);
         Debug.Log(voxelX + ", " + voxelY + " in chunk " + chunkX + ", " + chunkY);
 
@@ -71,4 +76,14 @@ public class VoxelMap : MonoBehaviour
         chunk.transform.localPosition = new Vector3(x * chunkSize - halfSize, y * chunkSize - halfSize);
         voxelChunks[i] = chunk;
     }
+
+    private void OnGUI()
+    {
+        GUILayout.BeginArea(new Rect(4f, 4f, 150f, 500f));
+        GUILayout.Label("Fill Type");
+        fillTypeIndex = GUILayout.SelectionGrid(fillTypeIndex, fillTypeNames, 2);
+        GUILayout.EndArea();
+    }
+
+    #endregion
 }
