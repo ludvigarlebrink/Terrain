@@ -39,12 +39,15 @@ public class VoxelMap : MonoBehaviour
         chunkSize = size / chunkResolution;
         voxelSize = chunkSize / voxelResolution;
 
-        voxelChunks = new VoxelChunk[chunkResolution * chunkResolution];
-        for (int i = 0, y = 0; y < chunkResolution; y++)
+        voxelChunks = new VoxelChunk[chunkResolution * chunkResolution * chunkResolution];
+        for (int i = 0, x = 0; x < chunkResolution; ++x)
         {
-            for (int x = 0; x < chunkResolution; x++, i++)
+            for (int y = 0; y < chunkResolution; ++y)
             {
-                CreateChunk(i, x, y);
+                for (int z = 0; z < chunkResolution; ++z, ++i)
+                {
+                    CreateChunk(i, x, y, z);
+                }
             }
         }
 
@@ -111,12 +114,12 @@ public class VoxelMap : MonoBehaviour
         }
     }
 
-    private void CreateChunk(int i, int x, int y)
+    private void CreateChunk(int i, int x, int y, int z)
     {
         VoxelChunk chunk = Instantiate(voxelChunkPrefab) as VoxelChunk;
         chunk.Initialize(voxelResolution, chunkSize);
         chunk.transform.parent = transform;
-        chunk.transform.localPosition = new Vector3(x * chunkSize - halfSize, y * chunkSize - halfSize);
+        chunk.transform.localPosition = new Vector3(x * chunkSize - halfSize, y * chunkSize - halfSize, z * chunkSize - halfSize);
         voxelChunks[i] = chunk;
         if (x > 0)
         {

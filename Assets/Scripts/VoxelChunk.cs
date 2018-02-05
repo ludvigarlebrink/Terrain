@@ -37,18 +37,21 @@ public class VoxelChunk : MonoBehaviour
         this.resolution = resolution;
         gridSize = size;
         voxelSize = size / resolution;
-        voxels = new Voxel[resolution * resolution];
+        voxels = new Voxel[resolution * resolution * resolution];
         voxelMaterials = new Material[voxels.Length];
 
         dummyX = new Voxel();
         dummyY = new Voxel();
         dummyT = new Voxel();
 
-        for (int i = 0, y = 0; y < resolution; ++y)
+        for (int i = 0, x = 0; x < resolution; ++x)
         {
-            for (int x = 0; x < resolution; ++x, ++i)
+            for (int y = 0; y < resolution; ++y)
             {
-                CreateVoxel(i, x, y);
+                for (int z = 0; z < resolution; ++z, ++i)
+                {
+                    CreateVoxel(i, x, y, z);
+                }
             }
         }
 
@@ -107,11 +110,11 @@ public class VoxelChunk : MonoBehaviour
         }
     }
 
-    private void CreateVoxel(int i, int x, int y)
+    private void CreateVoxel(int i, int x, int y, int z)
     {
         GameObject obj = Instantiate(voxelPrefab) as GameObject;
         obj.transform.parent = transform;
-        obj.transform.localPosition = new Vector3((x + 0.5f) * voxelSize, (y + 0.5f) * voxelSize, -0.01f);
+        obj.transform.localPosition = new Vector3((x + 0.5f) * voxelSize, (y + 0.5f) * voxelSize, (z + 0.5f) * voxelSize);
         obj.transform.localScale = Vector3.one * voxelSize * 0.1f;
         voxelMaterials[i] = obj.GetComponent<MeshRenderer>().material;
         voxels[i] = new Voxel(x, y, voxelSize);

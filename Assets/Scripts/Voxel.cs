@@ -15,7 +15,6 @@ public class Voxel
     #region Constructors
     public Voxel()
     {
-
     }
 
     public Voxel(int x, int y, float size)
