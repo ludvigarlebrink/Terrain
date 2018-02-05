@@ -44,9 +44,9 @@ public class VoxelChunk : MonoBehaviour
         dummyY = new Voxel();
         dummyT = new Voxel();
 
-        for (int i = 0, y = 0; y < resolution; y++)
+        for (int i = 0, y = 0; y < resolution; ++y)
         {
-            for (int x = 0; x < resolution; x++, i++)
+            for (int x = 0; x < resolution; ++x, ++i)
             {
                 CreateVoxel(i, x, y);
             }
@@ -58,6 +58,7 @@ public class VoxelChunk : MonoBehaviour
         mesh.name = "VoxelGrid Mesh";
         vertices = new List<Vector3>();
         triangles = new List<int>();
+
         Refresh();
     }
 
