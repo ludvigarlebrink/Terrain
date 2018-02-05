@@ -5,7 +5,6 @@ using UnityEngine;
 public class MarchingCubes : MonoBehaviour
 {
     #region Public Variables
-
     public float strength = 1.0f;
     public float addStrength = 0.5f;
     public float zoomSpeed = 15.0f;
@@ -27,13 +26,15 @@ public class MarchingCubes : MonoBehaviour
     private int multiplier;
     private int size2;
     private int isolevel = 0;
-    private Mesh geometry;
+    private Mesh mesh;
 
     private float axisMin = 0.0f;
     private float axisMax = 120.0f;
     private float axisRange;
 
     private Camera cam;
+
+    private LineRenderer lineRenderer;
 
     #endregion
 
@@ -46,8 +47,11 @@ public class MarchingCubes : MonoBehaviour
         axisRange = axisMax - axisMin;
         size2 = size * size;
 
-        geometry = new Mesh();
-        GetComponent<MeshFilter>().mesh = geometry;
+        mesh = new Mesh();
+        GetComponent<MeshFilter>().mesh = mesh;
+
+        lineRenderer = cam.transform.GetComponent<LineRenderer>();
+
 
         Initialize();
 
@@ -68,6 +72,9 @@ public class MarchingCubes : MonoBehaviour
                 int hitX = (int)(localHit.x / multiplier);
                 int hitY = (int)(localHit.y / multiplier);
                 int hitZ = (int)(localHit.z / multiplier);
+
+                lineRenderer.SetPosition(0, cam.transform.position + new Vector3(0, -1, 0));
+                lineRenderer.SetPosition(1, hit.point);
 
                 if (hitX >= 0 && hitY > 0 && hitZ >= 0)
                 {
@@ -92,11 +99,16 @@ public class MarchingCubes : MonoBehaviour
                 int hitY = (int)(localHit.y / multiplier);
                 int hitZ = (int)(localHit.z / multiplier);
 
+                lineRenderer.SetPosition(0, cam.transform.position + new Vector3(0, -1, 0));
+                lineRenderer.SetPosition(1, hit.point);
+
                 values[hitX + size * hitY + size2 * hitZ] += addStrength;
                 values[(hitX + size * hitY + size2 * hitZ) + size] += addStrength * 0.1f;
 
                 CreateChunk();
             }
+
+            Debug.Log("CLICKED!");
         }
     }
 
@@ -114,7 +126,10 @@ public class MarchingCubes : MonoBehaviour
                     float coordZ = axisMin + axisRange * z / (size - 1);
 
                     voxels.Add(new Vector3(x, y, z));
-                    int value = y == 0 ? 0 : -1;
+                    var value = -1;
+                    float wall = 0;
+                    //if (k==0) value=wall;
+                    if (y == 0) value = (int)wall;
 
                     values.Add(value);
                 }
@@ -285,17 +300,18 @@ public class MarchingCubes : MonoBehaviour
         }
         
         // Build the Mesh:
-        geometry.Clear();
+        mesh.Clear();
 
-        geometry.vertices = vertices.ToArray();
-        geometry.triangles = triangles.ToArray();
-        geometry.uv = uvs.ToArray();
+        mesh.vertices = vertices.ToArray();
+        mesh.triangles = triangles.ToArray();
+        mesh.uv = uvs.ToArray();
 
-        geometry.RecalculateNormals();
+        mesh.RecalculateNormals();
+        mesh.RecalculateTangents();
+
         //    geometry.Optimize();
         // update mesh collider (if needed?)
-        GetComponent<MeshCollider>().sharedMesh = null;
-        GetComponent<MeshCollider>().sharedMesh = geometry;
+        GetComponent<MeshCollider>().sharedMesh = mesh;
 
 
         vertices.Clear();
