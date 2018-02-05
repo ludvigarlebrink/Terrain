@@ -17,7 +17,7 @@ public class VoxelChunk : MonoBehaviour
 
     private int resolution;
 
-    private bool[] voxels;
+    private Voxel[] voxels;
 
     private float voxelSize;
     #endregion
@@ -27,7 +27,7 @@ public class VoxelChunk : MonoBehaviour
     {
         this.resolution = resolution;
         voxelSize = size / resolution;
-        voxels = new bool[resolution * resolution];
+        voxels = new Voxel[resolution * resolution];
         voxelMaterials = new Material[voxels.Length];
 
         for (int i = 0, y = 0; y < resolution; y++)
@@ -75,7 +75,7 @@ public class VoxelChunk : MonoBehaviour
             int i = y * resolution + xStart;
             for (int x = xStart; x <= xEnd; x++, i++)
             {
-                voxels[i] = stencil.Apply(x, y, voxels[i]);
+                voxels[i].state = stencil.Apply(x, y, voxels[i].state);
             }
         }
         SetVoxelColors();
@@ -88,7 +88,7 @@ public class VoxelChunk : MonoBehaviour
     {
         for (int i = 0; i < voxels.Length; i++)
         {
-            voxelMaterials[i].color = voxels[i] ? Color.black : Color.white;
+            voxelMaterials[i].color = voxels[i].state ? Color.black : Color.white;
         }
     }
 
@@ -99,6 +99,7 @@ public class VoxelChunk : MonoBehaviour
         obj.transform.localPosition = new Vector3((x + 0.5f) * voxelSize, (y + 0.5f) * voxelSize, -0.01f);
         obj.transform.localScale = Vector3.one * voxelSize * 0.1f;
         voxelMaterials[i] = obj.GetComponent<MeshRenderer>().material;
+        voxels[i] = new Voxel(x, y, voxelSize);
     }
 
     private void Refresh()
