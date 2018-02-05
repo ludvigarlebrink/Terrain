@@ -32,9 +32,9 @@ public class VoxelChunk : MonoBehaviour
         SetVoxelColors();
     }
 
-    public void SetVoxel(int x, int y, bool state)
+    public void Apply(int x, int y, VoxelStencil stencil)
     {
-        voxels[y * resolution + x] = state;
+        voxels[y * resolution + x] = stencil.Apply(x, y);
         SetVoxelColors();
     }
     #endregion
