@@ -1,15 +1,20 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 [SelectionBase]
 public class VoxelChunk : MonoBehaviour
 {
     #region Public Variables
-    private Material[] voxelMaterials;
-
     public GameObject voxelPrefab;
     #endregion
 
     #region Private Variables
+    private Material[] voxelMaterials;
+
+    private Mesh mesh;
+    private List<Vector3> vertices;
+    private List<int> triangles;
+
     private int resolution;
 
     private bool[] voxels;
@@ -34,6 +39,12 @@ public class VoxelChunk : MonoBehaviour
         }
 
         SetVoxelColors();
+
+        GetComponent<MeshFilter>().mesh = mesh = new Mesh();
+        mesh.name = "VoxelGrid Mesh";
+        vertices = new List<Vector3>();
+        triangles = new List<int>();
+        Refresh();
     }
 
     public void Apply(VoxelStencil stencil)
@@ -68,6 +79,7 @@ public class VoxelChunk : MonoBehaviour
             }
         }
         SetVoxelColors();
+        Refresh();
     }
     #endregion
 
@@ -87,6 +99,16 @@ public class VoxelChunk : MonoBehaviour
         obj.transform.localPosition = new Vector3((x + 0.5f) * voxelSize, (y + 0.5f) * voxelSize, -0.01f);
         obj.transform.localScale = Vector3.one * voxelSize * 0.1f;
         voxelMaterials[i] = obj.GetComponent<MeshRenderer>().material;
+    }
+
+    private void Refresh()
+    {
+        SetVoxelColors();
+        Triangulate();
+    }
+
+    private void Triangulate()
+    {
     }
     #endregion
 }
