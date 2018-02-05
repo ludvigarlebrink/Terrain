@@ -21,6 +21,7 @@ GameObject:
   - component: {fileID: 4336140849926328}
   - component: {fileID: 114045010269299772}
   - component: {fileID: 23285055073085974}
+  - component: {fileID: 33098032034036798}
   m_Layer: 0
   m_Name: VoxelChunk
   m_TagString: Untagged
@@ -75,6 +76,13 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!33 &33098032034036798
+MeshFilter:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1151635074935770}
+  m_Mesh: {fileID: 0}
 --- !u!114 &114045010269299772
 MonoBehaviour:
   m_ObjectHideFlags: 1

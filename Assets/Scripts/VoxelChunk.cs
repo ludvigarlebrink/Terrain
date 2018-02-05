@@ -2,6 +2,7 @@
 using UnityEngine;
 
 [SelectionBase]
+[RequireComponent(typeof(MeshRenderer), typeof(MeshFilter))]
 public class VoxelChunk : MonoBehaviour
 {
     #region Public Variables
@@ -102,14 +103,121 @@ public class VoxelChunk : MonoBehaviour
         voxels[i] = new Voxel(x, y, voxelSize);
     }
 
+    private void Triangulate()
+    {
+        vertices.Clear();
+        triangles.Clear();
+        mesh.Clear();
+
+        TriangulateCellRows();
+
+        mesh.vertices = vertices.ToArray();
+        mesh.triangles = triangles.ToArray();
+    }
+
+    void TriangulateCellRows()
+    {
+        int cells = resolution - 1;
+        for (int i = 0, y = 0; y < cells; ++y, ++i)
+        {
+            for (int x = 0; x < cells; ++x, ++i)
+            {
+                TriangulateCell(
+                    voxels[i],
+                    voxels[i + 1],
+                    voxels[i + resolution],
+                    voxels[i + resolution + 1]);
+            }
+        }
+    }
+
+    private void TriangulateCell(Voxel a, Voxel b, Voxel c, Voxel d)
+    {
+        int cellType = 0;
+        if (a.state)
+        {
+            cellType |= 1;
+        }
+
+        if (b.state)
+        {
+            cellType |= 2;
+        }
+
+        if (c.state)
+        {
+            cellType |= 4;
+        }
+
+        if (d.state)
+        {
+            cellType |= 8;
+        }
+
+        switch (cellType)
+        {
+            case 0:
+                return;
+            case 1:
+                AddTriangle(a.position, a.yEdgePosition, a.xEdgePosition);
+                break;
+            case 2:
+                AddTriangle(b.position, a.xEdgePosition, b.yEdgePosition);
+                break;
+            case 3:
+                AddQuad(a.position, a.yEdgePosition, b.yEdgePosition, b.position);
+                break;
+            case 4:
+                AddTriangle(c.position, c.xEdgePosition, a.yEdgePosition);
+                break;
+            case 5:
+                AddQuad(a.position, c.position, c.xEdgePosition, a.xEdgePosition);
+                break;
+            case 8:
+                AddTriangle(d.position, b.yEdgePosition, c.xEdgePosition);
+                break;
+            case 10:
+                AddQuad(a.xEdgePosition, c.xEdgePosition, d.position, b.position);
+                break;
+            case 12:
+                AddQuad(a.yEdgePosition, c.position, d.position, b.yEdgePosition);
+                break;
+            case 15:
+                AddQuad(a.position, c.position, d.position, b.position);
+                break;
+        }
+    }
+
+    private void AddTriangle(Vector3 a, Vector3 b, Vector3 c)
+    {
+        int vertexIndex = vertices.Count;
+        vertices.Add(a);
+        vertices.Add(b);
+        vertices.Add(c);
+        triangles.Add(vertexIndex);
+        triangles.Add(vertexIndex + 1);
+        triangles.Add(vertexIndex + 2);
+    }
+
+    private void AddQuad(Vector3 a, Vector3 b, Vector3 c, Vector3 d)
+    {
+        int vertexIndex = vertices.Count;
+        vertices.Add(a);
+        vertices.Add(b);
+        vertices.Add(c);
+        vertices.Add(d);
+        triangles.Add(vertexIndex);
+        triangles.Add(vertexIndex + 1);
+        triangles.Add(vertexIndex + 2);
+        triangles.Add(vertexIndex);
+        triangles.Add(vertexIndex + 2);
+        triangles.Add(vertexIndex + 3);
+    }
+
     private void Refresh()
     {
         SetVoxelColors();
         Triangulate();
-    }
-
-    private void Triangulate()
-    {
     }
     #endregion
 }
