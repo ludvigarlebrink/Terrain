@@ -11,6 +11,12 @@ public class VoxelMap : MonoBehaviour
 
     private VoxelChunk[] voxelChunks;
 
+    private VoxelStencil[] stencils =
+    {
+        new VoxelStencil(),
+        new VoxelStencilCircle()
+    };
+
     private float chunkSize;
     private float voxelSize;
     private float halfSize;
@@ -83,7 +89,7 @@ public class VoxelMap : MonoBehaviour
             yEnd = chunkResolution - 1;
         }
 
-        VoxelStencil activeStencil = new VoxelStencil();
+        VoxelStencil activeStencil = stencils[stencilIndex];
         activeStencil.Initialize(fillTypeIndex == 0, radiusIndex);
 
         int voxelYOffset = yStart * voxelResolution;

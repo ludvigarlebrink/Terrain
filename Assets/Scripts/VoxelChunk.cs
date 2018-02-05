@@ -84,8 +84,8 @@ public class VoxelChunk : MonoBehaviour
     {
         GameObject obj = Instantiate(voxelPrefab) as GameObject;
         obj.transform.parent = transform;
-        obj.transform.localPosition = new Vector3((x + 0.5f) * voxelSize, (y + 0.5f) * voxelSize);
-        obj.transform.localScale = Vector3.one * voxelSize * 0.9f;
+        obj.transform.localPosition = new Vector3((x + 0.5f) * voxelSize, (y + 0.5f) * voxelSize, -0.01f);
+        obj.transform.localScale = Vector3.one * voxelSize * 0.1f;
         voxelMaterials[i] = obj.GetComponent<MeshRenderer>().material;
     }
     #endregion
