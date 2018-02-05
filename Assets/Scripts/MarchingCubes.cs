@@ -33,9 +33,6 @@ public class MarchingCubes : MonoBehaviour
     private float axisRange;
 
     private Camera cam;
-
-    private LineRenderer lineRenderer;
-
     #endregion
 
     #region Private Methods
@@ -49,9 +46,6 @@ public class MarchingCubes : MonoBehaviour
 
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
-
-        lineRenderer = cam.transform.GetComponent<LineRenderer>();
-
 
         Initialize();
 
@@ -72,9 +66,6 @@ public class MarchingCubes : MonoBehaviour
                 int hitX = (int)(localHit.x / multiplier);
                 int hitY = (int)(localHit.y / multiplier);
                 int hitZ = (int)(localHit.z / multiplier);
-
-                lineRenderer.SetPosition(0, cam.transform.position + new Vector3(0, -1, 0));
-                lineRenderer.SetPosition(1, hit.point);
 
                 if (hitX >= 0 && hitY > 0 && hitZ >= 0)
                 {
@@ -99,9 +90,6 @@ public class MarchingCubes : MonoBehaviour
                 int hitY = (int)(localHit.y / multiplier);
                 int hitZ = (int)(localHit.z / multiplier);
 
-                lineRenderer.SetPosition(0, cam.transform.position + new Vector3(0, -1, 0));
-                lineRenderer.SetPosition(1, hit.point);
-
                 values[hitX + size * hitY + size2 * hitZ] += addStrength;
                 values[(hitX + size * hitY + size2 * hitZ) + size] += addStrength * 0.1f;
 
@@ -125,11 +113,15 @@ public class MarchingCubes : MonoBehaviour
                     float coordY = axisMin + axisRange * y / (size - 1);
                     float coordZ = axisMin + axisRange * z / (size - 1);
 
-                    voxels.Add(new Vector3(x, y, z));
-                    var value = -1;
+                    voxels.Add(new Vector3(coordX, coordY, coordZ));
+
+                    int value = -1;
                     float wall = 0;
                     //if (k==0) value=wall;
-                    if (y == 0) value = (int)wall;
+                    if (y == 0)
+                    {
+                        value = (int)wall;
+                    }
 
                     values.Add(value);
                 }
