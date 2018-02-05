@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(MeshRenderer), typeof(MeshFilter), typeof(MeshCollider))]
 public class MarchingCubes : MonoBehaviour
 {
     #region Public Variables
@@ -98,6 +99,14 @@ public class MarchingCubes : MonoBehaviour
         }
     }
 
+    private void OnDrawGizmos()
+    {
+        foreach (Vector3 voxel in voxels)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawSphere(voxel, 0.5f);
+        }
+    }
 
     private void Initialize()
     {
@@ -168,7 +177,7 @@ public class MarchingCubes : MonoBehaviour
                     cubeIndex |= value6 < isolevel ? 128 : 0;
                     cubeIndex |= value7 < isolevel ? 64 : 0;
 
-                    int bits = TrisTable.EdgeTable[cubeIndex];
+                    int bits = CubeTables.EdgeTable[cubeIndex];
 
                     if (bits == 0)
                     {
@@ -252,11 +261,11 @@ public class MarchingCubes : MonoBehaviour
                     cubeIndex <<= 4;
 
                     int i = 0;
-                    while (TrisTable.TriTable[cubeIndex + i] != -1)
+                    while (CubeTables.TriTable[cubeIndex + i] != -1)
                     {
-                        int index1 = TrisTable.TriTable[cubeIndex + i];
-                        int index2 = TrisTable.TriTable[cubeIndex + i + 1];
-                        int index3 = TrisTable.TriTable[cubeIndex + i + 2];
+                        int index1 = CubeTables.TriTable[cubeIndex + i];
+                        int index2 = CubeTables.TriTable[cubeIndex + i + 1];
+                        int index3 = CubeTables.TriTable[cubeIndex + i + 2];
 
                         vertices.Add(vertexList[index1]);
                         vertices.Add(vertexList[index2]);
@@ -295,8 +304,8 @@ public class MarchingCubes : MonoBehaviour
         mesh.triangles = triangles.ToArray();
         mesh.uv = uvs.ToArray();
 
-        mesh.RecalculateNormals();
-        mesh.RecalculateTangents();
+        mesh.RecalculateNormals(60);
+        //mesh.RecalculateTangents();
 
         //    geometry.Optimize();
         // update mesh collider (if needed?)
