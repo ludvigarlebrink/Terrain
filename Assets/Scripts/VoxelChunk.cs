@@ -7,6 +7,9 @@ public class VoxelChunk : MonoBehaviour
 {
     #region Public Variables
     public GameObject voxelPrefab;
+    public VoxelChunk xNeighbor;
+    public VoxelChunk yNeighbor;
+    public VoxelChunk xyNeighbor;
     #endregion
 
     #region Private Variables
@@ -21,15 +24,25 @@ public class VoxelChunk : MonoBehaviour
     private Voxel[] voxels;
 
     private float voxelSize;
+    private float gridSize;
+
+    private Voxel dummyX;
+    private Voxel dummyY;
+    private Voxel dummyT;
     #endregion
 
     #region Public Methods
     public void Initialize(int resolution, float size)
     {
         this.resolution = resolution;
+        gridSize = size;
         voxelSize = size / resolution;
         voxels = new Voxel[resolution * resolution];
         voxelMaterials = new Material[voxels.Length];
+
+        dummyX = new Voxel();
+        dummyY = new Voxel();
+        dummyT = new Voxel();
 
         for (int i = 0, y = 0; y < resolution; y++)
         {
@@ -109,13 +122,21 @@ public class VoxelChunk : MonoBehaviour
         triangles.Clear();
         mesh.Clear();
 
+        if (xNeighbor != null)
+        {
+            dummyX.BecomeXDummyOf(xNeighbor.voxels[0], gridSize);
+        }
         TriangulateCellRows();
+        if(yNeighbor != null)
+        {
+            TriangulateGapRow();
+        }
 
         mesh.vertices = vertices.ToArray();
         mesh.triangles = triangles.ToArray();
     }
 
-    void TriangulateCellRows()
+    private void TriangulateCellRows()
     {
         int cells = resolution - 1;
         for (int i = 0, y = 0; y < cells; ++y, ++i)
@@ -128,6 +149,33 @@ public class VoxelChunk : MonoBehaviour
                     voxels[i + resolution],
                     voxels[i + resolution + 1]);
             }
+
+            if (xNeighbor != null)
+            {
+                TriangulateGapCell(i);
+            }
+        }
+    }
+
+    private void TriangulateGapRow()
+    {
+        dummyY.BecomeYDummyOf(yNeighbor.voxels[0], gridSize);
+        int cells = resolution - 1;
+        int offset = cells * resolution;
+
+        for (int x = 0; x < cells; ++x)
+        {
+            Voxel dummySwap = dummyT;
+            dummySwap.BecomeYDummyOf(yNeighbor.voxels[x + 1], gridSize);
+            dummyT = dummyY;
+            dummyY = dummySwap;
+            TriangulateCell(voxels[x + offset], voxels[x + offset + 1], dummyT, dummyY);
+        }
+
+        if (xNeighbor != null)
+        {
+            dummyT.BecomeXYDummyOf(xyNeighbor.voxels[0], gridSize);
+            TriangulateCell(voxels[voxels.Length - 1], dummyX, dummyY, dummyT);
         }
     }
 
@@ -173,19 +221,48 @@ public class VoxelChunk : MonoBehaviour
             case 5:
                 AddQuad(a.position, c.position, c.xEdgePosition, a.xEdgePosition);
                 break;
+            case 6:
+                AddTriangle(b.position, a.xEdgePosition, b.yEdgePosition);
+                AddTriangle(c.position, c.xEdgePosition, a.yEdgePosition);
+                break;
+            case 7:
+                AddPentagon(a.position, c.position, c.xEdgePosition, b.yEdgePosition, b.position);
+                break;
             case 8:
+                AddTriangle(d.position, b.yEdgePosition, c.xEdgePosition);
+                break;
+            case 9:
+                AddTriangle(a.position, a.yEdgePosition, a.xEdgePosition);
                 AddTriangle(d.position, b.yEdgePosition, c.xEdgePosition);
                 break;
             case 10:
                 AddQuad(a.xEdgePosition, c.xEdgePosition, d.position, b.position);
                 break;
+            case 11:
+                AddPentagon(b.position, a.position, a.yEdgePosition, c.xEdgePosition, d.position);
+                break;
             case 12:
                 AddQuad(a.yEdgePosition, c.position, d.position, b.yEdgePosition);
+                break;
+            case 13:
+                AddPentagon(c.position, d.position, b.yEdgePosition, a.xEdgePosition, a.position);
+                break;
+            case 14:
+                AddPentagon(d.position, b.position, a.xEdgePosition, a.yEdgePosition, c.position);
                 break;
             case 15:
                 AddQuad(a.position, c.position, d.position, b.position);
                 break;
         }
+    }
+
+    private void TriangulateGapCell(int i)
+    {
+        Voxel dummySwap = dummyT;
+        dummySwap.BecomeXDummyOf(xNeighbor.voxels[i + 1], gridSize);
+        dummyT = dummyX;
+        dummyX = dummySwap;
+        TriangulateCell(voxels[i], dummyT, voxels[i + resolution], dummyX);
     }
 
     private void AddTriangle(Vector3 a, Vector3 b, Vector3 c)
@@ -212,6 +289,25 @@ public class VoxelChunk : MonoBehaviour
         triangles.Add(vertexIndex);
         triangles.Add(vertexIndex + 2);
         triangles.Add(vertexIndex + 3);
+    }
+
+    private void AddPentagon(Vector3 a, Vector3 b, Vector3 c, Vector3 d, Vector3 e)
+    {
+        int vertexIndex = vertices.Count;
+        vertices.Add(a);
+        vertices.Add(b);
+        vertices.Add(c);
+        vertices.Add(d);
+        vertices.Add(e);
+        triangles.Add(vertexIndex);
+        triangles.Add(vertexIndex + 1);
+        triangles.Add(vertexIndex + 2);
+        triangles.Add(vertexIndex);
+        triangles.Add(vertexIndex + 2);
+        triangles.Add(vertexIndex + 3);
+        triangles.Add(vertexIndex);
+        triangles.Add(vertexIndex + 3);
+        triangles.Add(vertexIndex + 4);
     }
 
     private void Refresh()
