@@ -5,17 +5,21 @@ public class VoxelChunk : MonoBehaviour
 {
     private int resolution;
 
-    public GameObject voxelPrefab;
-
     private bool[] voxels;
 
     private float voxelSize;
 
+    private Material[] voxelMaterials;
+
+    public GameObject voxelPrefab;
+
+    #region Public Methods
     public void Initialize(int resolution, float size)
     {
         this.resolution = resolution;
         voxelSize = size / resolution;
         voxels = new bool[resolution * resolution];
+        voxelMaterials = new Material[voxels.Length];
 
         for (int i = 0, y = 0; y < resolution; y++)
         {
@@ -23,6 +27,24 @@ public class VoxelChunk : MonoBehaviour
             {
                 CreateVoxel(i, x, y);
             }
+        }
+
+        SetVoxelColors();
+    }
+
+    public void SetVoxel(int x, int y, bool state)
+    {
+        voxels[y * resolution + x] = state;
+        SetVoxelColors();
+    }
+    #endregion
+
+    #region Private Methods
+    private void SetVoxelColors()
+    {
+        for (int i = 0; i < voxels.Length; i++)
+        {
+            voxelMaterials[i].color = voxels[i] ? Color.black : Color.white;
         }
     }
 
@@ -32,5 +54,7 @@ public class VoxelChunk : MonoBehaviour
         obj.transform.parent = transform;
         obj.transform.localPosition = new Vector3((x + 0.5f) * voxelSize, (y + 0.5f) * voxelSize);
         obj.transform.localScale = Vector3.one * voxelSize * 0.9f;
+        voxelMaterials[i] = obj.GetComponent<MeshRenderer>().material;
     }
+    #endregion
 }

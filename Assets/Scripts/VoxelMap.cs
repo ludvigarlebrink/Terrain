@@ -11,7 +11,9 @@ public class VoxelMap : MonoBehaviour
 
     private VoxelChunk[] voxelChunks;
 
-    private float chunkSize, voxelSize, halfSize;
+    private float chunkSize;
+    private float voxelSize;
+    private float halfSize;
 
     private void Awake()
     {
@@ -49,9 +51,15 @@ public class VoxelMap : MonoBehaviour
 
     private void EditVoxels(Vector3 point)
     {
-        int voxelX = (int)(point.x / voxelSize);
-        int voxelY = (int)(point.y / voxelSize);
-        Debug.Log(voxelX + ", " + voxelY);
+        int voxelX = (int)((point.x + halfSize) / voxelSize);
+        int voxelY = (int)((point.y + halfSize) / voxelSize);
+        int chunkX = voxelX / voxelResolution;
+        int chunkY = voxelY / voxelResolution;
+        voxelX -= chunkX * voxelResolution;
+        voxelY -= chunkY * voxelResolution;
+        voxelChunks[chunkY * chunkResolution + chunkX].SetVoxel(voxelX, voxelY, true);
+        Debug.Log(voxelX + ", " + voxelY + " in chunk " + chunkX + ", " + chunkY);
+
     }
 
     private void CreateChunk(int i, int x, int y)
