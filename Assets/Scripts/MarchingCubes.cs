@@ -213,7 +213,7 @@ namespace name.algorithm
                         cubeIndex |= value6 < isolevel ? 128 : 0;
                         cubeIndex |= value7 < isolevel ? 64 : 0;
 
-                        int bits = CubeTables.EdgeTable[CalculateCubeIndex(x,y,z)];
+                        int bits = CubeTables.EdgeTable[cubeIndex];
 
                         if (bits == 0)
                         {
