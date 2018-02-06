@@ -36,6 +36,12 @@ namespace Name.Terrain
         private float axisRange;
 
         private Camera cam;
+
+        private struct Bits
+        {
+
+        }
+
         #endregion
 
         #region Private Methods
