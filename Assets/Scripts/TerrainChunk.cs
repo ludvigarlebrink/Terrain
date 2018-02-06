@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace name.algorithm
+namespace Name.Terrain
 {
     [RequireComponent(typeof(MeshRenderer), typeof(MeshFilter), typeof(MeshCollider))]
-    public class MarchingCubes : MonoBehaviour
+    public class TerrainChunk : MonoBehaviour
     {
         #region Public Variables
         public float strength = 1.0f;
@@ -73,7 +73,7 @@ namespace name.algorithm
                         if (hitX < size - 1 && hitY < size - 1 && hitZ < size - 1)
                         {
                             values[hitX + size * hitY + size2 * hitZ] -= strength;
-                            values[(hitX + size * hitY + size2 * hitZ) + size] -= strength * 0.1f;
+                            values[(hitX + size * hitY + size2 * hitZ) + size] -= strength * Time.deltaTime;
                             CreateChunk();
                         }
                     }
@@ -92,12 +92,10 @@ namespace name.algorithm
                     int hitZ = (int)(localHit.z / multiplier);
 
                     values[hitX + size * hitY + size2 * hitZ] += addStrength;
-                    values[(hitX + size * hitY + size2 * hitZ) + size] += addStrength * 0.1f;
+                    values[(hitX + size * hitY + size2 * hitZ) + size] += addStrength * Time.deltaTime;
 
                     CreateChunk();
                 }
-
-                Debug.Log("CLICKED!");
             }
         }
 
@@ -109,6 +107,7 @@ namespace name.algorithm
                 Gizmos.DrawSphere(voxel.position, 0.5f);
             }
         }
+
         private void Initialize()
         {
             for (int z = 0; z < size; ++z)
@@ -218,78 +217,78 @@ namespace name.algorithm
                             continue;
                         }
 
-                        float mu = 0.5f;
+                        float alpha = 0.5f;
 
                         if ((bits & 1) != 0)
                         {
-                            mu = (isolevel - value0) / (value1 - value0);
-                            vertexList[0] = LerpSelf(voxels[(int)point].position, voxels[(int)pointX].position, mu);
+                            alpha = (isolevel - value0) / (value1 - value0);
+                            vertexList[0] = Vector3.Lerp(voxels[(int)point].position, voxels[(int)pointX].position, alpha);
                         }
 
                         if ((bits & 2) != 0)
                         {
-                            mu = (isolevel - value1) / (value3 - value1);
-                            vertexList[1] = LerpSelf(voxels[(int)pointX].position, voxels[(int)pointXY].position, mu);
+                            alpha = (isolevel - value1) / (value3 - value1);
+                            vertexList[1] = Vector3.Lerp(voxels[(int)pointX].position, voxels[(int)pointXY].position, alpha);
                         }
 
                         if ((bits & 4) != 0)
                         {
-                            mu = (isolevel - value2) / (value3 - value2);
-                            vertexList[2] = LerpSelf(voxels[(int)pointY].position, voxels[(int)pointXY].position, mu);
+                            alpha = (isolevel - value2) / (value3 - value2);
+                            vertexList[2] = Vector3.Lerp(voxels[(int)pointY].position, voxels[(int)pointXY].position, alpha);
                         }
 
                         if ((bits & 8) != 0)
                         {
-                            mu = (isolevel - value0) / (value2 - value0);
-                            vertexList[3] = LerpSelf(voxels[(int)point].position, voxels[(int)pointY].position, mu);
+                            alpha = (isolevel - value0) / (value2 - value0);
+                            vertexList[3] = Vector3.Lerp(voxels[(int)point].position, voxels[(int)pointY].position, alpha);
                         }
 
                         if ((bits & 16) != 0)
                         {
-                            mu = (isolevel - value4) / (value5 - value4);
-                            vertexList[4] = LerpSelf(voxels[(int)pointZ].position, voxels[(int)pointXZ].position, mu);
+                            alpha = (isolevel - value4) / (value5 - value4);
+                            vertexList[4] = Vector3.Lerp(voxels[(int)pointZ].position, voxels[(int)pointXZ].position, alpha);
                         }
 
                         if ((bits & 32) != 0)
                         {
-                            mu = (isolevel - value5) / (value7 - value5);
-                            vertexList[5] = LerpSelf(voxels[(int)pointXZ].position, voxels[(int)pointXYZ].position, mu);
+                            alpha = (isolevel - value5) / (value7 - value5);
+                            vertexList[5] = Vector3.Lerp(voxels[(int)pointXZ].position, voxels[(int)pointXYZ].position, alpha);
                         }
 
                         if ((bits & 64) != 0)
                         {
-                            mu = (isolevel - value6) / (value7 - value6);
-                            vertexList[6] = LerpSelf(voxels[(int)pointYZ].position, voxels[(int)pointXYZ].position, mu);
+                            alpha = (isolevel - value6) / (value7 - value6);
+                            vertexList[6] = Vector3.Lerp(voxels[(int)pointYZ].position, voxels[(int)pointXYZ].position, alpha);
                         }
 
                         if ((bits & 128) != 0)
                         {
-                            mu = (isolevel - value4) / (value6 - value4);
-                            vertexList[7] = LerpSelf(voxels[(int)pointZ].position, voxels[(int)pointYZ].position, mu);
+                            alpha = (isolevel - value4) / (value6 - value4);
+                            vertexList[7] = Vector3.Lerp(voxels[(int)pointZ].position, voxels[(int)pointYZ].position, alpha);
                         }
 
                         if ((bits & 256) != 0)
                         {
-                            mu = (isolevel - value0) / (value4 - value0);
-                            vertexList[8] = LerpSelf(voxels[(int)point].position, voxels[(int)pointZ].position, mu);
+                            alpha = (isolevel - value0) / (value4 - value0);
+                            vertexList[8] = Vector3.Lerp(voxels[(int)point].position, voxels[(int)pointZ].position, alpha);
                         }
 
                         if ((bits & 512) != 0)
                         {
-                            mu = (isolevel - value1) / (value5 - value1);
-                            vertexList[9] = LerpSelf(voxels[(int)pointX].position, voxels[(int)pointXZ].position, mu);
+                            alpha = (isolevel - value1) / (value5 - value1);
+                            vertexList[9] = Vector3.Lerp(voxels[(int)pointX].position, voxels[(int)pointXZ].position, alpha);
                         }
 
                         if ((bits & 1024) != 0)
                         {
-                            mu = (isolevel - value3) / (value7 - value3);
-                            vertexList[10] = LerpSelf(voxels[(int)pointXY].position, voxels[(int)pointXYZ].position, mu);
+                            alpha = (isolevel - value3) / (value7 - value3);
+                            vertexList[10] = Vector3.Lerp(voxels[(int)pointXY].position, voxels[(int)pointXYZ].position, alpha);
                         }
 
                         if ((bits & 2048) != 0)
                         {
-                            mu = (isolevel - value2) / (value6 - value2);
-                            vertexList[11] = LerpSelf(voxels[(int)pointY].position, voxels[(int)pointYZ].position, mu);
+                            alpha = (isolevel - value2) / (value6 - value2);
+                            vertexList[11] = Vector3.Lerp(voxels[(int)pointY].position, voxels[(int)pointYZ].position, alpha);
                         }
 
                         cubeIndex <<= 4;
@@ -344,15 +343,6 @@ namespace name.algorithm
             vertices.Clear();
             uvs.Clear();
             triangles.Clear();
-        }
-
-        private Vector3 LerpSelf(Vector3 o, Vector3 v, float alpha)
-        {
-            Vector3 value = o;
-            value.x += (v.x - o.x) * alpha;
-            value.y += (v.y - o.y) * alpha;
-            value.z += (v.z - o.z) * alpha;
-            return value;
         }
         #endregion
     }
