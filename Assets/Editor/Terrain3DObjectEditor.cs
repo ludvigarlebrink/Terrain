@@ -11,7 +11,9 @@ namespace NameEditor.Terrain
     {
         public override void OnInspectorGUI()
         {
-
+            EditorGUILayout.HelpBox(
+                "Edit this in with Terrain3D in scene.",
+                MessageType.None, true);
         }
 
         [MenuItem("Assets/Create/Terrain3D")]

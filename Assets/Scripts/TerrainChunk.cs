@@ -182,7 +182,7 @@ namespace Name.Terrain
                             cubeIndex |= v[index] < isolevel ? resolutions[index] : 0;
                         }
 
-                        int bits = CubeTables.EdgeTable[cubeIndex];
+                        int bits = Terrain3DTables.EdgeTable[cubeIndex];
 
                         if (bits == 0)
                         {
@@ -266,11 +266,11 @@ namespace Name.Terrain
                         cubeIndex <<= 4;
 
                         int i = 0;
-                        while (CubeTables.TriTable[cubeIndex + i] != -1)
+                        while (Terrain3DTables.TriTable[cubeIndex + i] != -1)
                         {
-                            int index1 = CubeTables.TriTable[cubeIndex + i];
-                            int index2 = CubeTables.TriTable[cubeIndex + i + 1];
-                            int index3 = CubeTables.TriTable[cubeIndex + i + 2];
+                            int index1 = Terrain3DTables.TriTable[cubeIndex + i];
+                            int index2 = Terrain3DTables.TriTable[cubeIndex + i + 1];
+                            int index3 = Terrain3DTables.TriTable[cubeIndex + i + 2];
 
                             vertices.Add(vertexList[index1]);
                             vertices.Add(vertexList[index2]);

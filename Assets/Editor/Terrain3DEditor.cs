@@ -18,38 +18,29 @@ namespace NameEditor.Terrain
 
         private int selectedTab = 0;
 
-        private string[] elevationTools =
-{
-            "Raise",
-            "Smoothen",
-            "Fixed"
-        };
+        private bool isEditing = false;
 
-        private int selectedElevationTool = 0;
-
-        private float brushStrength = 100.0f;
-        private float brushSize = 10.0f;
-
-        private bool isEditing;
+        private Terrain3DElevation elevation = new Terrain3DElevation();
+        private Terrain3DPaint paint = new Terrain3DPaint();
 
         public override void OnInspectorGUI()
         {
-            Terrain3D terrain3D = target as Terrain3D;
+            Terrain3D terrain3D = (Terrain3D)target;
 
             selectedTab = GUILayout.Toolbar(selectedTab, tabs);
 
             switch (selectedTab)
             {
                 case 0:
-                    DrawElevation();
+                    elevation.DrawInspector();
                     break;
 
                 case 1:
-                    DrawPaint();
+                    paint.DrawInspector();
                     break;
 
                 case 2:
-                    DrawProperties();
+
                     break;
 
                 default:
@@ -91,27 +82,14 @@ namespace NameEditor.Terrain
             AssetDatabase.SaveAssets();
         }
 
-        private void DrawElevation()
-        {
-            Terrain3D terrain3D = target as Terrain3D;
-
-            EditorGUILayout.LabelField("Brush", EditorStyles.boldLabel);
-            brushStrength = EditorGUILayout.Slider("Strength", brushStrength, 0.0f, 100.0f);
-            brushSize = EditorGUILayout.Slider("Size", brushSize, 0.0f, 200.0f);
-        }
-
         private void DrawPaint()
         {
-            Terrain3D terrain3D = target as Terrain3D;
-
-            EditorGUILayout.LabelField("Brush", EditorStyles.boldLabel);
-            brushStrength = EditorGUILayout.Slider("Strength",brushStrength, 0.0f, 100.0f);
-            brushSize = EditorGUILayout.Slider("Size", brushSize, 0.0f, 200.0f);
+            Terrain3D terrain3D = (Terrain3D)target;
         }
 
         private void DrawProperties()
         {
-            Terrain3D terrain3D = target as Terrain3D;
+            Terrain3D terrain3D = (Terrain3D)target;
 
             terrain3D.chunks = EditorGUILayout.IntField("Chunks", terrain3D.chunks);
             terrain3D.chunkSize = EditorGUILayout.IntField("Chunk Size", terrain3D.chunkSize);
@@ -120,7 +98,7 @@ namespace NameEditor.Terrain
 
         private void Refresh()
         {
-            Terrain3D terrain3D = target as Terrain3D;
+            Terrain3D terrain3D = (Terrain3D)target;
         }
     }
 }
