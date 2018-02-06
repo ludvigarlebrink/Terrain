@@ -24,6 +24,7 @@ namespace Name.Terrain
         private List<int> triangles = new List<int>();
         private Vector3[] vertexList = new Vector3[12];
 
+        private int[] resolutions = { 1, 2, 8, 4, 16, 32, 128, 64 };
         private int size = 15;
         private int multiplier;
         private int size2;
@@ -135,38 +136,20 @@ namespace Name.Terrain
             }
         }
 
-        private int CalculateCubeIndex(int x, int y, int z)
+        private float[] GetPoints(int x, int y, int z)
         {
-            float point = x + size * y + size2 * z;
-            float pointX = point + 1;
-            float pointY = point + size;
-            float pointXY = pointY + 1;
-            float pointZ = point + size2;
-            float pointXZ = pointX + size2;
-            float pointYZ = pointY + size2;
-            float pointXYZ = pointXY + size2;
+            float[] points = new float[8];
 
-            float value0 = values[(int)point];
-            float value1 = values[(int)pointX];
-            float value2 = values[(int)pointY];
-            float value3 = values[(int)pointXY];
-            float value4 = values[(int)pointZ];
-            float value5 = values[(int)pointXZ];
-            float value6 = values[(int)pointYZ];
-            float value7 = values[(int)pointXYZ];
+            points[0] = x + size * y + size2 * z;   // Point
+            points[1] = points[0] + 1;              // PointX
+            points[2] = points[0] + size;           // PointY
+            points[3] = points[2] + 1;              // PointXY
+            points[4] = points[0] + size2;          // PointZ
+            points[5] = points[1] + size2;          // PointXZ
+            points[6] = points[2] + size2;          // PointYZ
+            points[7] = points[3] + size2;          // PointXYZ
 
-            int cubeIndex = 0;
-
-            cubeIndex |= value0 < isolevel ? 1 : 0;
-            cubeIndex |= value1 < isolevel ? 2 : 0;
-            cubeIndex |= value2 < isolevel ? 8 : 0;
-            cubeIndex |= value3 < isolevel ? 4 : 0;
-            cubeIndex |= value4 < isolevel ? 16 : 0;
-            cubeIndex |= value5 < isolevel ? 32 : 0;
-            cubeIndex |= value6 < isolevel ? 128 : 0;
-            cubeIndex |= value7 < isolevel ? 64 : 0;
-
-            return cubeIndex;
+            return points;
         }
 
         private void CreateChunk()
@@ -181,34 +164,23 @@ namespace Name.Terrain
                 {
                     for (int x = 0; x < count; ++x)
                     {
-                        float point = x + size * y + size2 * z;
-                        float pointX = point + 1;
-                        float pointY = point + size;
-                        float pointXY = pointY + 1;
-                        float pointZ = point + size2;
-                        float pointXZ = pointX + size2;
-                        float pointYZ = pointY + size2;
-                        float pointXYZ = pointXY + size2;
+                        // Index of base points, and also adjacent points on cube.
+                        float[] p = GetPoints(x, y, z);
 
-                        float value0 = values[(int)point];
-                        float value1 = values[(int)pointX];
-                        float value2 = values[(int)pointY];
-                        float value3 = values[(int)pointXY];
-                        float value4 = values[(int)pointZ];
-                        float value5 = values[(int)pointXZ];
-                        float value6 = values[(int)pointYZ];
-                        float value7 = values[(int)pointXYZ];
+                        // Scalars corresponding to vertices.
+                        float[] v = new float[p.Length];
+
+                        for (int index = 0; index < p.Length; ++index)
+                        {
+                            v[index] = values[(int)p[index]];
+                        }
 
                         int cubeIndex = 0;
 
-                        cubeIndex |= value0 < isolevel ? 1 : 0;
-                        cubeIndex |= value1 < isolevel ? 2 : 0;
-                        cubeIndex |= value2 < isolevel ? 8 : 0;
-                        cubeIndex |= value3 < isolevel ? 4 : 0;
-                        cubeIndex |= value4 < isolevel ? 16 : 0;
-                        cubeIndex |= value5 < isolevel ? 32 : 0;
-                        cubeIndex |= value6 < isolevel ? 128 : 0;
-                        cubeIndex |= value7 < isolevel ? 64 : 0;
+                        for(int index = 0; index < v.Length; ++index)
+                        {
+                            cubeIndex |= v[index] < isolevel ? resolutions[index] : 0;
+                        }
 
                         int bits = CubeTables.EdgeTable[cubeIndex];
 
@@ -221,74 +193,74 @@ namespace Name.Terrain
 
                         if ((bits & 1) != 0)
                         {
-                            alpha = (isolevel - value0) / (value1 - value0);
-                            vertexList[0] = Vector3.Lerp(voxels[(int)point].position, voxels[(int)pointX].position, alpha);
+                            alpha = (isolevel - v[0]) / (v[1] - v[0]);
+                            vertexList[0] = Vector3.Lerp(voxels[(int)p[0]].position, voxels[(int)p[1]].position, alpha);
                         }
 
                         if ((bits & 2) != 0)
                         {
-                            alpha = (isolevel - value1) / (value3 - value1);
-                            vertexList[1] = Vector3.Lerp(voxels[(int)pointX].position, voxels[(int)pointXY].position, alpha);
+                            alpha = (isolevel - v[1]) / (v[3] - v[1]);
+                            vertexList[1] = Vector3.Lerp(voxels[(int)p[1]].position, voxels[(int)p[3]].position, alpha);
                         }
 
                         if ((bits & 4) != 0)
                         {
-                            alpha = (isolevel - value2) / (value3 - value2);
-                            vertexList[2] = Vector3.Lerp(voxels[(int)pointY].position, voxels[(int)pointXY].position, alpha);
+                            alpha = (isolevel - v[2]) / (v[3] - v[2]);
+                            vertexList[2] = Vector3.Lerp(voxels[(int)p[2]].position, voxels[(int)p[3]].position, alpha);
                         }
 
                         if ((bits & 8) != 0)
                         {
-                            alpha = (isolevel - value0) / (value2 - value0);
-                            vertexList[3] = Vector3.Lerp(voxels[(int)point].position, voxels[(int)pointY].position, alpha);
+                            alpha = (isolevel - v[0]) / (v[2] - v[0]);
+                            vertexList[3] = Vector3.Lerp(voxels[(int)p[0]].position, voxels[(int)p[2]].position, alpha);
                         }
 
                         if ((bits & 16) != 0)
                         {
-                            alpha = (isolevel - value4) / (value5 - value4);
-                            vertexList[4] = Vector3.Lerp(voxels[(int)pointZ].position, voxels[(int)pointXZ].position, alpha);
+                            alpha = (isolevel - v[4]) / (v[5] - v[4]);
+                            vertexList[4] = Vector3.Lerp(voxels[(int)p[4]].position, voxels[(int)p[5]].position, alpha);
                         }
 
                         if ((bits & 32) != 0)
                         {
-                            alpha = (isolevel - value5) / (value7 - value5);
-                            vertexList[5] = Vector3.Lerp(voxels[(int)pointXZ].position, voxels[(int)pointXYZ].position, alpha);
+                            alpha = (isolevel - v[5]) / (v[7] - v[5]);
+                            vertexList[5] = Vector3.Lerp(voxels[(int)p[5]].position, voxels[(int)p[7]].position, alpha);
                         }
 
                         if ((bits & 64) != 0)
                         {
-                            alpha = (isolevel - value6) / (value7 - value6);
-                            vertexList[6] = Vector3.Lerp(voxels[(int)pointYZ].position, voxels[(int)pointXYZ].position, alpha);
+                            alpha = (isolevel - v[6]) / (v[7] - v[6]);
+                            vertexList[6] = Vector3.Lerp(voxels[(int)p[6]].position, voxels[(int)p[7]].position, alpha);
                         }
 
                         if ((bits & 128) != 0)
                         {
-                            alpha = (isolevel - value4) / (value6 - value4);
-                            vertexList[7] = Vector3.Lerp(voxels[(int)pointZ].position, voxels[(int)pointYZ].position, alpha);
+                            alpha = (isolevel - v[4]) / (v[6] - v[4]);
+                            vertexList[7] = Vector3.Lerp(voxels[(int)p[4]].position, voxels[(int)p[6]].position, alpha);
                         }
 
                         if ((bits & 256) != 0)
                         {
-                            alpha = (isolevel - value0) / (value4 - value0);
-                            vertexList[8] = Vector3.Lerp(voxels[(int)point].position, voxels[(int)pointZ].position, alpha);
+                            alpha = (isolevel - v[0]) / (v[4] - v[0]);
+                            vertexList[8] = Vector3.Lerp(voxels[(int)p[0]].position, voxels[(int)p[4]].position, alpha);
                         }
 
                         if ((bits & 512) != 0)
                         {
-                            alpha = (isolevel - value1) / (value5 - value1);
-                            vertexList[9] = Vector3.Lerp(voxels[(int)pointX].position, voxels[(int)pointXZ].position, alpha);
+                            alpha = (isolevel - v[1]) / (v[5] - v[1]);
+                            vertexList[9] = Vector3.Lerp(voxels[(int)p[1]].position, voxels[(int)p[5]].position, alpha);
                         }
 
                         if ((bits & 1024) != 0)
                         {
-                            alpha = (isolevel - value3) / (value7 - value3);
-                            vertexList[10] = Vector3.Lerp(voxels[(int)pointXY].position, voxels[(int)pointXYZ].position, alpha);
+                            alpha = (isolevel - v[3]) / (v[7] - v[3]);
+                            vertexList[10] = Vector3.Lerp(voxels[(int)p[3]].position, voxels[(int)p[7]].position, alpha);
                         }
 
                         if ((bits & 2048) != 0)
                         {
-                            alpha = (isolevel - value2) / (value6 - value2);
-                            vertexList[11] = Vector3.Lerp(voxels[(int)pointY].position, voxels[(int)pointYZ].position, alpha);
+                            alpha = (isolevel - v[2]) / (v[6] - v[2]);
+                            vertexList[11] = Vector3.Lerp(voxels[(int)p[2]].position, voxels[(int)p[6]].position, alpha);
                         }
 
                         cubeIndex <<= 4;
@@ -326,6 +298,10 @@ namespace Name.Terrain
                             vertexIndex += 3;
                             i += 3;
                         }
+
+                        // Release allocated objects...?
+                        p = null;
+                        v = null;
                     }
                 }
             }
