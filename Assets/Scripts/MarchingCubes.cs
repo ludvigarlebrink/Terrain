@@ -14,7 +14,7 @@ public class MarchingCubes : MonoBehaviour
     #endregion
 
     #region Private Variables
-    private List<Vector3> voxels = new List<Vector3>();
+    private List<Voxel> voxels = new List<Voxel>();
     private List<float> values = new List<float>();
 
     private List<Vector3> vertices = new List<Vector3>();
@@ -101,10 +101,10 @@ public class MarchingCubes : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        foreach (Vector3 voxel in voxels)
+        foreach (Voxel voxel in voxels)
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawSphere(voxel, 0.5f);
+            Gizmos.DrawSphere(voxel.position, 0.5f);
         }
     }
 
@@ -120,11 +120,10 @@ public class MarchingCubes : MonoBehaviour
                     float coordY = axisMin + axisRange * y / (size - 1);
                     float coordZ = axisMin + axisRange * z / (size - 1);
 
-                    voxels.Add(new Vector3(coordX, coordY, coordZ));
+                    voxels.Add(new Voxel(coordX, coordY, coordZ));
 
                     int value = -1;
                     float wall = 0;
-                    //if (k==0) value=wall;
                     if (y == 0)
                     {
                         value = (int)wall;
@@ -189,73 +188,73 @@ public class MarchingCubes : MonoBehaviour
                     if ((bits & 1) != 0)
                     {
                         mu = (isolevel - value0) / (value1 - value0);
-                        vertexList[0] = LerpSelf(voxels[(int)point], voxels[(int)pointX], mu);
+                        vertexList[0] = LerpSelf(voxels[(int)point].position, voxels[(int)pointX].position, mu);
                     }
 
                     if ((bits & 2) != 0)
                     {
                         mu = (isolevel - value1) / (value3 - value1);
-                        vertexList[1] = LerpSelf(voxels[(int)pointX], voxels[(int)pointXY], mu);
+                        vertexList[1] = LerpSelf(voxels[(int)pointX].position, voxels[(int)pointXY].position, mu);
                     }
 
                     if ((bits & 4) != 0)
                     {
                         mu = (isolevel - value2) / (value3 - value2);
-                        vertexList[2] = LerpSelf(voxels[(int)pointY], voxels[(int)pointXY], mu);
+                        vertexList[2] = LerpSelf(voxels[(int)pointY].position, voxels[(int)pointXY].position, mu);
                     }
 
                     if ((bits & 8) != 0)
                     {
                         mu = (isolevel - value0) / (value2 - value0);
-                        vertexList[3] = LerpSelf(voxels[(int)point], voxels[(int)pointY], mu);
+                        vertexList[3] = LerpSelf(voxels[(int)point].position, voxels[(int)pointY].position, mu);
                     }
 
                     if ((bits & 16) != 0)
                     {
                         mu = (isolevel - value4) / (value5 - value4);
-                        vertexList[4] = LerpSelf(voxels[(int)pointZ], voxels[(int)pointXZ], mu);
+                        vertexList[4] = LerpSelf(voxels[(int)pointZ].position, voxels[(int)pointXZ].position, mu);
                     }
 
                     if ((bits & 32) != 0)
                     {
                         mu = (isolevel - value5) / (value7 - value5);
-                        vertexList[5] = LerpSelf(voxels[(int)pointXZ], voxels[(int)pointXYZ], mu);
+                        vertexList[5] = LerpSelf(voxels[(int)pointXZ].position, voxels[(int)pointXYZ].position, mu);
                     }
 
                     if ((bits & 64) != 0)
                     {
                         mu = (isolevel - value6) / (value7 - value6);
-                        vertexList[6] = LerpSelf(voxels[(int)pointYZ], voxels[(int)pointXYZ], mu);
+                        vertexList[6] = LerpSelf(voxels[(int)pointYZ].position, voxels[(int)pointXYZ].position, mu);
                     }
 
                     if ((bits & 128) != 0)
                     {
                         mu = (isolevel - value4) / (value6 - value4);
-                        vertexList[7] = LerpSelf(voxels[(int)pointZ], voxels[(int)pointYZ], mu);
+                        vertexList[7] = LerpSelf(voxels[(int)pointZ].position, voxels[(int)pointYZ].position, mu);
                     }
 
                     if ((bits & 256) != 0)
                     {
                         mu = (isolevel - value0) / (value4 - value0);
-                        vertexList[8] = LerpSelf(voxels[(int)point], voxels[(int)pointZ], mu);
+                        vertexList[8] = LerpSelf(voxels[(int)point].position, voxels[(int)pointZ].position, mu);
                     }
 
                     if ((bits & 512) != 0)
                     {
                         mu = (isolevel - value1) / (value5 - value1);
-                        vertexList[9] = LerpSelf(voxels[(int)pointX], voxels[(int)pointXZ], mu);
+                        vertexList[9] = LerpSelf(voxels[(int)pointX].position, voxels[(int)pointXZ].position, mu);
                     }
 
                     if ((bits & 1024) != 0)
                     {
                         mu = (isolevel - value3) / (value7 - value3);
-                        vertexList[10] = LerpSelf(voxels[(int)pointXY], voxels[(int)pointXYZ], mu);
+                        vertexList[10] = LerpSelf(voxels[(int)pointXY].position, voxels[(int)pointXYZ].position, mu);
                     }
 
                     if ((bits & 2048) != 0)
                     {
                         mu = (isolevel - value2) / (value6 - value2);
-                        vertexList[11] = LerpSelf(voxels[(int)pointY], voxels[(int)pointYZ], mu);
+                        vertexList[11] = LerpSelf(voxels[(int)pointY].position, voxels[(int)pointYZ].position, mu);
                     }
 
                     cubeIndex <<= 4;
@@ -307,8 +306,6 @@ public class MarchingCubes : MonoBehaviour
         mesh.RecalculateNormals(60);
         //mesh.RecalculateTangents();
 
-        //    geometry.Optimize();
-        // update mesh collider (if needed?)
         GetComponent<MeshCollider>().sharedMesh = mesh;
 
         vertices.Clear();
