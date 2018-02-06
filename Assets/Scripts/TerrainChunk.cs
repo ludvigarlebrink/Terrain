@@ -164,10 +164,10 @@ namespace Name.Terrain
                 {
                     for (int x = 0; x < count; ++x)
                     {
-                        // Index of base points, and also adjacent points on cube
+                        // Index of base points, and also adjacent points on cube.
                         float[] p = GetPoints(x, y, z);
 
-                        // Scalars corresponding to vertices
+                        // Scalars corresponding to vertices.
                         float[] v = new float[p.Length];
 
                         for (int index = 0; index < p.Length; ++index)
