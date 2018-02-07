@@ -71,7 +71,7 @@ namespace NameEditor.Terrain
 
             GUILayout.EndHorizontal();
         }
-
+        
         private void OnEnable()
         {
             Terrain3D terrain3D = (Terrain3D)target;
