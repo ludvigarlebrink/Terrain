@@ -11,21 +11,32 @@ namespace Name.Terrain
         public int chunkSize = 4;
         public int resolution = 8;
 
-        private TerrainChunk terrainChunk;
+        public TerrainChunk terrainChunk;
 
         public void Initialize()
         {
-            terrainChunk = gameObject.AddComponent<TerrainChunk>();
+            terrainChunk = gameObject.GetComponent<TerrainChunk>();
+            if (!terrainChunk)
+            {
+                terrainChunk = gameObject.AddComponent<TerrainChunk>();
+            }
+
             terrainChunk.Initialize();
         }
 
         public void Refresh()
         {
+            if (!terrainChunk)
+            {
+                terrainChunk = gameObject.GetComponent<TerrainChunk>();
+            }
+
             terrainChunk.CreateChunk();
         }
 
         private void Awake()
         {
+
         }
     }
 }

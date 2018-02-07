@@ -31,22 +31,22 @@ namespace Name.Terrain
         public float zoomSpeed = 15.0f;
 
         public Vector3 offset = new Vector3(0, 0, 0);
+
+        public List<Voxel> voxels = new List<Voxel>();
         #endregion
 
         #region Private Variables
-        private List<Voxel> voxels = new List<Voxel>();
-
         private List<Vector3> vertices = new List<Vector3>();
         private List<Vector2> uvs = new List<Vector2>();
         private List<int> triangles = new List<int>();
         private Vector3[] vertexList = new Vector3[12];
 
         private int[] resolutions = { 1, 2, 8, 4, 16, 32, 128, 64 };
-        private VertPoint[] vp = new VertPoint[12];
+        private VertPoint[] vertPoint = new VertPoint[12];
         
-        private int size = 15;
-        private int multiplier;
-        private int size2;
+        public int size = 15;
+        public int multiplier;
+        public int size2;
         private int isolevel = 0;
         private Mesh mesh;
 
@@ -58,10 +58,62 @@ namespace Name.Terrain
         #endregion
 
         #region Public Methods
+        #endregion
+
+        #region Private Methods
+        private void Update()
+        {
+        //    // Reduce block when right mouse button is pressed.
+        //    if (Input.GetMouseButton(1))
+        //    {
+        //        // Cast a ray through a screen point and return the hit point
+        //        Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+        //        RaycastHit hit;
+        //        if (Physics.Raycast(ray, out hit, 999.0f))
+        //        {
+        //            // Transform the hit point from world space to local space
+        //            Vector3 localHit = transform.InverseTransformPoint(hit.point);
+        //
+        //            int hitX = (int)(localHit.x / multiplier);
+        //            int hitY = (int)(localHit.y / multiplier);
+        //            int hitZ = (int)(localHit.z / multiplier);
+        //
+        //            if (hitX >= 0 && hitY > 0 && hitZ >= 0)
+        //            {
+        //                if (hitX < size - 1 && hitY < size - 1 && hitZ < size - 1)
+        //                {
+        //                    voxels[hitX + size * hitY + size2 * hitZ].value -= strength;
+        //                    voxels[(hitX + size * hitY + size2 * hitZ) + size].value -= strength * Time.deltaTime;
+        //                    CreateChunk();
+        //                }
+        //            }
+        //        }
+        //    }
+        //    // Raise block when left mouse is pressed.
+        //    else if (Input.GetMouseButton(0))
+        //    {
+        //        // Cast a ray through a screen point and return the hit point
+        //        Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+        //        RaycastHit hit;
+        //        if (Physics.Raycast(ray, out hit, 999.0f))
+        //        {
+        //            // Transform the hit point from world space to local space
+        //            Vector3 localHit = transform.InverseTransformPoint(hit.point);
+        //
+        //            int hitX = (int)(localHit.x / multiplier);
+        //            int hitY = (int)(localHit.y / multiplier);
+        //            int hitZ = (int)(localHit.z / multiplier);
+        //
+        //            voxels[hitX + size * hitY + size2 * hitZ].value += addStrength;
+        //            voxels[(hitX + size * hitY + size2 * hitZ) + size].value += addStrength * Time.deltaTime;
+        //
+        //            CreateChunk();
+        //        }
+        //    }
+        }
+
         public void Initialize()
         {
-            cam = Camera.main;
-
             multiplier = (int)(axisMax / size);
             axisRange = axisMax - axisMin;
             size2 = size * size;
@@ -79,7 +131,6 @@ namespace Name.Terrain
                         float coordY = axisMin + axisRange * y / (size - 1);
                         float coordZ = axisMin + axisRange * z / (size - 1);
 
-
                         float value = -1.0f;
                         float wall = 1.0f;
                         if (y < size / 2)
@@ -93,72 +144,18 @@ namespace Name.Terrain
             }
 
             // Initialize VertPoint. Used to store scalar values and index of points for each case.
-            vp[0].value = new int[] { 0, 1, 0, 0, 1 };
-            vp[1].value = new int[] { 1, 3, 1, 1, 3 };
-            vp[2].value = new int[] { 2, 3, 2, 2, 3 };
-            vp[3].value = new int[] { 0, 2, 0, 0, 2 };
-            vp[4].value = new int[] { 4, 5, 4, 4, 5 };
-            vp[5].value = new int[] { 5, 7, 5, 5, 7 };
-            vp[6].value = new int[] { 6, 7, 6, 6, 7 };
-            vp[7].value = new int[] { 4, 6, 4, 4, 6 };
-            vp[8].value = new int[] { 0, 4, 0, 0, 4 };
-            vp[9].value = new int[] { 1, 5, 1, 1, 5 };
-            vp[10].value = new int[] { 3, 7, 3, 3, 7 };
-            vp[11].value = new int[] { 2, 6, 2, 2, 6 };
-
-        }
-        #endregion
-
-        #region Private Methods
-        private void Update()
-        {
-            // Reduce block when right mouse button is pressed.
-            if (Input.GetMouseButton(1))
-            {
-                // Cast a ray through a screen point and return the hit point
-                Ray ray = cam.ScreenPointToRay(Input.mousePosition);
-                RaycastHit hit;
-                if (Physics.Raycast(ray, out hit, 999.0f))
-                {
-                    // Transform the hit point from world space to local space
-                    Vector3 localHit = transform.InverseTransformPoint(hit.point);
-
-                    int hitX = (int)(localHit.x / multiplier);
-                    int hitY = (int)(localHit.y / multiplier);
-                    int hitZ = (int)(localHit.z / multiplier);
-
-                    if (hitX >= 0 && hitY > 0 && hitZ >= 0)
-                    {
-                        if (hitX < size - 1 && hitY < size - 1 && hitZ < size - 1)
-                        {
-                            voxels[hitX + size * hitY + size2 * hitZ].value -= strength;
-                            voxels[(hitX + size * hitY + size2 * hitZ) + size].value -= strength * Time.deltaTime;
-                            CreateChunk();
-                        }
-                    }
-                }
-            }
-            // Raise block when left mouse is pressed.
-            else if (Input.GetMouseButton(0))
-            {
-                // Cast a ray through a screen point and return the hit point
-                Ray ray = cam.ScreenPointToRay(Input.mousePosition);
-                RaycastHit hit;
-                if (Physics.Raycast(ray, out hit, 999.0f))
-                {
-                    // Transform the hit point from world space to local space
-                    Vector3 localHit = transform.InverseTransformPoint(hit.point);
-
-                    int hitX = (int)(localHit.x / multiplier);
-                    int hitY = (int)(localHit.y / multiplier);
-                    int hitZ = (int)(localHit.z / multiplier);
-
-                    voxels[hitX + size * hitY + size2 * hitZ].value += addStrength;
-                    voxels[(hitX + size * hitY + size2 * hitZ) + size].value += addStrength * Time.deltaTime;
-
-                    CreateChunk();
-                }
-            }
+            vertPoint[0].value = new int[] { 0, 1, 0, 0, 1 };
+            vertPoint[1].value = new int[] { 1, 3, 1, 1, 3 };
+            vertPoint[2].value = new int[] { 2, 3, 2, 2, 3 };
+            vertPoint[3].value = new int[] { 0, 2, 0, 0, 2 };
+            vertPoint[4].value = new int[] { 4, 5, 4, 4, 5 };
+            vertPoint[5].value = new int[] { 5, 7, 5, 5, 7 };
+            vertPoint[6].value = new int[] { 6, 7, 6, 6, 7 };
+            vertPoint[7].value = new int[] { 4, 6, 4, 4, 6 };
+            vertPoint[8].value = new int[] { 0, 4, 0, 0, 4 };
+            vertPoint[9].value = new int[] { 1, 5, 1, 1, 5 };
+            vertPoint[10].value = new int[] { 3, 7, 3, 3, 7 };
+            vertPoint[11].value = new int[] { 2, 6, 2, 2, 6 };
         }
 
         private void OnDrawGizmos()
@@ -225,14 +222,14 @@ namespace Name.Terrain
                     for (int x = 0; x < count; ++x)
                     {
                         // Index of base points, and also adjacent points on cube.
-                        float[] p = GetPoints(x, y, z);
+                        float[] basePoints = GetPoints(x, y, z);
 
                         // Store scalars corresponding to vertices.
-                        float[] v = new float[p.Length];
+                        float[] storedScalars = new float[basePoints.Length];
 
-                        for (int index = 0; index < p.Length; ++index)
+                        for (int j = 0; j < basePoints.Length; ++j)
                         {
-                            v[index] = voxels[(int)p[index]].value;
+                            storedScalars[j] = voxels[(int)basePoints[j]].value;
                         }
 
                         // Initialize cubeindex
@@ -240,9 +237,9 @@ namespace Name.Terrain
 
                         // First part of the algorithm uses a table which maps the vertices under the isosurface to the
                         // intersecting edges. An 8 bit index is formed where each bit corresponds to a vertex.
-                        for(int index = 0; index < v.Length; ++index)
+                        for(int j = 0; j < storedScalars.Length; ++j)
                         {
-                            cubeIndex |= v[index] < isolevel ? resolutions[index] : 0;
+                            cubeIndex |= storedScalars[j] < isolevel ? resolutions[j] : 0;
                         }
 
                         int bits = Terrain3DTables.EdgeTable[cubeIndex];
@@ -254,7 +251,6 @@ namespace Name.Terrain
                         }
 
                         float alpha = 0.5f;
-
                         int resValue = 1;
 
                         // Check which edges are crossed and estimate the point location with a weighted average of scalar values at edge endpoints. 
@@ -265,8 +261,8 @@ namespace Name.Terrain
                         {
                             if((bits & resValue) != 0)
                             {
-                                alpha = (isolevel - v[vp[index].value[0]]) / (v[vp[index].value[1]] - v[vp[index].value[2]]);
-                                vertexList[index] = Vector3.Lerp(voxels[(int)p[vp[index].value[3]]].position, voxels[(int)p[vp[index].value[4]]].position, alpha);
+                                alpha = (isolevel - storedScalars[vertPoint[index].value[0]]) / (storedScalars[vertPoint[index].value[1]] - storedScalars[vertPoint[index].value[2]]);
+                                vertexList[index] = Vector3.Lerp(voxels[(int)basePoints[vertPoint[index].value[3]]].position, voxels[(int)basePoints[vertPoint[index].value[4]]].position, alpha);
                             }
 
                             resValue = resValue * 2;
