@@ -93,10 +93,14 @@ namespace NameEditor.Terrain
 
             Event e = Event.current;
 
+            if (e.alt)
+            {
+                return;
+            }
+
             if ((e.type == EventType.MouseDown || e.type == EventType.MouseDrag) && e.button == 0)
             {
-                int controlId = GUIUtility.GetControlID(FocusType.Passive);
-                GUIUtility.hotControl = controlId;
+                GUIUtility.hotControl = GUIUtility.GetControlID(FocusType.Passive);
 
                 // Cast a ray through a screen point and return the hit point
                 Camera cam = Camera.current;
@@ -114,19 +118,16 @@ namespace NameEditor.Terrain
                 Vector3 mousePosition = e.mousePosition;
                 mousePosition.y = sceneView.camera.pixelHeight - e.mousePosition.y;
 
-
                 Ray ray = cam.ScreenPointToRay(mousePosition);
                 RaycastHit hit;
                 if (Physics.Raycast(ray, out hit, Mathf.Infinity))
                 {
-                    Debug.Log("Test");
-
                     Debug.DrawLine(ray.origin, hit.point);
 
                     // Transform the hit point from world space to local space
                     Vector3 localHit = terrain3D.transform.InverseTransformPoint(hit.point);
                     TerrainChunk chunk = terrain3D.terrainChunk;
-            
+
                     int hitX = (int)(localHit.x / chunk.multiplier);
                     int hitY = (int)(localHit.y / chunk.multiplier);
                     int hitZ = (int)(localHit.z / chunk.multiplier);
@@ -136,8 +137,6 @@ namespace NameEditor.Terrain
 
                     Refresh();
                 }
-
-                e.Use();
             }
         }
 
