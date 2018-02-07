@@ -38,6 +38,7 @@ namespace Name.Terrain
         #region Public Variables
         public bool state;
         public Vector3 position;
+        public float value;
         public Voxel[] neighbours;
         #endregion
 
@@ -51,9 +52,11 @@ namespace Name.Terrain
             }
         }
 
-        public Voxel(float x, float y, float z)
+        public Voxel(float x, float y, float z, float value)
         {
             position = new Vector3(x, y, z);
+            this.value = value;
+
             neighbours = new Voxel[24];
             for (int i = 0; i < neighbours.Length; ++i)
             {
