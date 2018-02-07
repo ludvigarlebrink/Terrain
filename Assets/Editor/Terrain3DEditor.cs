@@ -40,7 +40,7 @@ namespace NameEditor.Terrain
                     break;
 
                 case 2:
-
+                    DrawProperties();
                     break;
 
                 default:
@@ -80,11 +80,6 @@ namespace NameEditor.Terrain
             Terrain3DObject terrain3DObject = CreateInstance<Terrain3DObject>();
             AssetDatabase.CreateAsset(terrain3DObject, "Assets/Terrain3D.asset");
             AssetDatabase.SaveAssets();
-        }
-
-        private void DrawPaint()
-        {
-            Terrain3D terrain3D = (Terrain3D)target;
         }
 
         private void DrawProperties()

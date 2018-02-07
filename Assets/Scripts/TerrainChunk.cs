@@ -140,14 +140,29 @@ namespace Name.Terrain
         {
             float[] points = new float[8];
 
-            points[0] = x + size * y + size2 * z;   // Point
-            points[1] = points[0] + 1;              // PointX
-            points[2] = points[0] + size;           // PointY
-            points[3] = points[2] + 1;              // PointXY
-            points[4] = points[0] + size2;          // PointZ
-            points[5] = points[1] + size2;          // PointXZ
-            points[6] = points[2] + size2;          // PointYZ
-            points[7] = points[3] + size2;          // PointXYZ
+            // Point.
+            points[0] = x + size * y + size2 * z;
+
+            // PointX.
+            points[1] = points[0] + 1;
+
+            // PointY.
+            points[2] = points[0] + size;
+
+            // PointXY.
+            points[3] = points[2] + 1;
+
+            // PointZ.
+            points[4] = points[0] + size2;
+
+            // PointXZ.
+            points[5] = points[1] + size2;
+
+            // PointYZ.
+            points[6] = points[2] + size2;
+
+            // PointXYZ.
+            points[7] = points[3] + size2;
 
             return points;
         }
@@ -298,10 +313,6 @@ namespace Name.Terrain
                             vertexIndex += 3;
                             i += 3;
                         }
-
-                        // Release allocated objects...?
-                        p = null;
-                        v = null;
                     }
                 }
             }

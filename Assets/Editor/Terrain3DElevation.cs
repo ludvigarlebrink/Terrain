@@ -52,6 +52,13 @@ namespace NameEditor.Terrain
                     break;
 
                 case 2:
+                    EditorGUILayout.HelpBox(
+                        "Flatten Terrain\n" +
+                        "- Hold left mouse button to flatten\n" +
+                        "- Hold ctrl + left mouse button to sample height",
+                        MessageType.None, true);
+
+                    EditorGUILayout.Toggle("Inverse", false);
 
                     break;
 
