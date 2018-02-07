@@ -141,9 +141,9 @@ namespace Name.Terrain
                         float coordZ = axisMin + axisRange * z / (size - 1);
 
 
-                        int value = -1;
-                        float wall = 0;
-                        if (y == 0)
+                        float value = -1.0f;
+                        float wall = 0.0f;
+                        if (y < size / 2)
                         {
                             value = (int)wall;
                         }
