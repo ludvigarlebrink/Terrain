@@ -13,9 +13,10 @@ namespace Name.Terrain
             value = new int[size];
 
             for (int i = 0; i < size; ++i)
+            {
                 value[i] = 0;
+            }
         }
-
     }
 }
 
@@ -54,11 +55,10 @@ namespace Name.Terrain
         private float axisRange;
 
         private Camera cam;
-
         #endregion
 
-        #region Private Methods
-        private void Awake()
+        #region Public Methods
+        public void Initialize()
         {
             cam = Camera.main;
 
@@ -68,11 +68,48 @@ namespace Name.Terrain
 
             mesh = new Mesh();
             GetComponent<MeshFilter>().mesh = mesh;
-            
-            Initialize();
-            CreateChunk();
-        }
 
+            for (int z = 0; z < size; ++z)
+            {
+                for (int y = 0; y < size; ++y)
+                {
+                    for (int x = 0; x < size; ++x)
+                    {
+                        float coordX = axisMin + axisRange * x / (size - 1);
+                        float coordY = axisMin + axisRange * y / (size - 1);
+                        float coordZ = axisMin + axisRange * z / (size - 1);
+
+
+                        float value = -1.0f;
+                        float wall = 1.0f;
+                        if (y < size / 2)
+                        {
+                            value = (int)wall;
+                        }
+
+                        voxels.Add(new Voxel(coordX, coordY, coordZ, value));
+                    }
+                }
+            }
+
+            // Initialize VertPoint. Used to store scalar values and index of points for each case.
+            vp[0].value = new int[] { 0, 1, 0, 0, 1 };
+            vp[1].value = new int[] { 1, 3, 1, 1, 3 };
+            vp[2].value = new int[] { 2, 3, 2, 2, 3 };
+            vp[3].value = new int[] { 0, 2, 0, 0, 2 };
+            vp[4].value = new int[] { 4, 5, 4, 4, 5 };
+            vp[5].value = new int[] { 5, 7, 5, 5, 7 };
+            vp[6].value = new int[] { 6, 7, 6, 6, 7 };
+            vp[7].value = new int[] { 4, 6, 4, 4, 6 };
+            vp[8].value = new int[] { 0, 4, 0, 0, 4 };
+            vp[9].value = new int[] { 1, 5, 1, 1, 5 };
+            vp[10].value = new int[] { 3, 7, 3, 3, 7 };
+            vp[11].value = new int[] { 2, 6, 2, 2, 6 };
+
+        }
+        #endregion
+
+        #region Private Methods
         private void Update()
         {
             // Reduce block when right mouse button is pressed.
@@ -81,7 +118,7 @@ namespace Name.Terrain
                 // Cast a ray through a screen point and return the hit point
                 Ray ray = cam.ScreenPointToRay(Input.mousePosition);
                 RaycastHit hit;
-                if (Physics.Raycast(ray, out hit, 999f))
+                if (Physics.Raycast(ray, out hit, 999.0f))
                 {
                     // Transform the hit point from world space to local space
                     Vector3 localHit = transform.InverseTransformPoint(hit.point);
@@ -107,7 +144,7 @@ namespace Name.Terrain
                 // Cast a ray through a screen point and return the hit point
                 Ray ray = cam.ScreenPointToRay(Input.mousePosition);
                 RaycastHit hit;
-                if (Physics.Raycast(ray, out hit, 999f))
+                if (Physics.Raycast(ray, out hit, 999.0f))
                 {
                     // Transform the hit point from world space to local space
                     Vector3 localHit = transform.InverseTransformPoint(hit.point);
@@ -128,49 +165,19 @@ namespace Name.Terrain
         {
             foreach (Voxel voxel in voxels)
             {
-                Gizmos.color = new Color(voxel.value, voxel.value, voxel.value);
+                float color = Mathf.Clamp(Mathf.Abs(voxel.value), 0.0f, 1.0f);
+                if (voxel.value < 0.0f)
+                {
+                    float secondaryColor = 1.0f - color;
+                    Gizmos.color = new Color(color, 0.5f, 0.5f);
+                }
+                else
+                {
+                    float secondaryColor = 1.0f - color;
+                    Gizmos.color = new Color(0.5f, color, 0.5f);
+                }
                 Gizmos.DrawSphere(voxel.position, 0.5f);
             }
-        }
-
-        private void Initialize()
-        {
-            for (int z = 0; z < size; ++z)
-            {
-                for (int y = 0; y < size; ++y)
-                {
-                    for (int x = 0; x < size; ++x)
-                    {
-                        float coordX = axisMin + axisRange * x / (size - 1);
-                        float coordY = axisMin + axisRange * y / (size - 1);
-                        float coordZ = axisMin + axisRange * z / (size - 1);
-
-                        float value = -1.0f;
-                        float wall = 0.0f;
-                        if (y < size / 2)
-                        {
-                            value = (int)wall;
-                        }
-
-                        voxels.Add(new Voxel(coordX, coordY, coordZ, value));
-                    }
-                }
-            }
-
-            // Initialize VertPoint. Used to store scalar values and index of points for each case. 
-            vp[0].value = new int[] { 0, 1, 0, 0, 1 };
-            vp[1].value = new int[] { 1, 3, 1, 1, 3 };
-            vp[2].value = new int[] { 2, 3, 2, 2, 3 };
-            vp[3].value = new int[] { 0, 2, 0, 0, 2 };
-            vp[4].value = new int[] { 4, 5, 4, 4, 5 };
-            vp[5].value = new int[] { 5, 7, 5, 5, 7 };
-            vp[6].value = new int[] { 6, 7, 6, 6, 7 };
-            vp[7].value = new int[] { 4, 6, 4, 4, 6 };
-            vp[8].value = new int[] { 0, 4, 0, 0, 4 };
-            vp[9].value = new int[] { 1, 5, 1, 1, 5 };
-            vp[10].value = new int[] { 3, 7, 3, 3, 7 };
-            vp[11].value = new int[] { 2, 6, 2, 2, 6 };
-
         }
 
         private float[] GetPoints(int x, int y, int z)
@@ -204,7 +211,7 @@ namespace Name.Terrain
             return points;
         }
 
-        private void CreateChunk()
+        public void CreateChunk()
         {
             // Direction swapper used for correctiong UV-coordinates
             int directionSwapper = 0;
