@@ -78,6 +78,8 @@ namespace NameEditor.Terrain
             terrain3D.Initialize();
             terrain3D.Refresh();
             Tools.hidden = true;
+
+            EditorUtility.SetSelectedRenderState(terrain3D.gameObject.GetComponent<Renderer>(), EditorSelectedRenderState.Hidden);
         }
 
         private void OnDisable()
@@ -93,50 +95,14 @@ namespace NameEditor.Terrain
 
             Event e = Event.current;
 
-            if (e.alt)
+            switch (selectedTab)
             {
-                return;
-            }
+                case 0:
+                    elevation.Update(terrain3D);
+                    break;
 
-            if ((e.type == EventType.MouseDown || e.type == EventType.MouseDrag) && e.button == 0)
-            {
-                GUIUtility.hotControl = GUIUtility.GetControlID(FocusType.Passive);
-
-                // Cast a ray through a screen point and return the hit point
-                Camera cam = Camera.current;
-                if (!cam)
-                {
-                    return;
-                }
-
-                SceneView sceneView = SceneView.currentDrawingSceneView;
-                if (!sceneView)
-                {
-                    return;
-                }
-
-                Vector3 mousePosition = e.mousePosition;
-                mousePosition.y = sceneView.camera.pixelHeight - e.mousePosition.y;
-
-                Ray ray = cam.ScreenPointToRay(mousePosition);
-                RaycastHit hit;
-                if (Physics.Raycast(ray, out hit, Mathf.Infinity))
-                {
-                    Debug.DrawLine(ray.origin, hit.point);
-
-                    // Transform the hit point from world space to local space
-                    Vector3 localHit = terrain3D.transform.InverseTransformPoint(hit.point);
-                    TerrainChunk chunk = terrain3D.terrainChunk;
-
-                    int hitX = (int)(localHit.x / chunk.multiplier);
-                    int hitY = (int)(localHit.y / chunk.multiplier);
-                    int hitZ = (int)(localHit.z / chunk.multiplier);
-
-                    chunk.voxels[hitX + chunk.size * hitY + chunk.size2 * hitZ].value += 0.5f * Time.deltaTime;
-                    chunk.voxels[(hitX + chunk.size * hitY + chunk.size2 * hitZ) + chunk.size].value += 0.1f * Time.deltaTime;
-
-                    Refresh();
-                }
+                default:
+                    break;
             }
         }
 
