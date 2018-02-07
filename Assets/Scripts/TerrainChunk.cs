@@ -92,7 +92,7 @@ namespace Name.Terrain
                 }
             }
 
-            // Initialize VertPoint.
+            // Initialize VertPoint. Used to store scalar values and index of points for each case.
             vp[0].value = new int[] { 0, 1, 0, 0, 1 };
             vp[1].value = new int[] { 1, 3, 1, 1, 3 };
             vp[2].value = new int[] { 2, 3, 2, 2, 3 };
@@ -112,13 +112,15 @@ namespace Name.Terrain
         #region Private Methods
         private void Update()
         {
-            // Reduce block.
+            // Reduce block when right mouse button is pressed.
             if (Input.GetMouseButton(1))
             {
+                // Cast a ray through a screen point and return the hit point
                 Ray ray = cam.ScreenPointToRay(Input.mousePosition);
                 RaycastHit hit;
                 if (Physics.Raycast(ray, out hit, 999.0f))
                 {
+                    // Transform the hit point from world space to local space
                     Vector3 localHit = transform.InverseTransformPoint(hit.point);
 
                     int hitX = (int)(localHit.x / multiplier);
@@ -136,12 +138,15 @@ namespace Name.Terrain
                     }
                 }
             }
+            // Raise block when left mouse is pressed.
             else if (Input.GetMouseButton(0))
             {
+                // Cast a ray through a screen point and return the hit point
                 Ray ray = cam.ScreenPointToRay(Input.mousePosition);
                 RaycastHit hit;
                 if (Physics.Raycast(ray, out hit, 999.0f))
                 {
+                    // Transform the hit point from world space to local space
                     Vector3 localHit = transform.InverseTransformPoint(hit.point);
 
                     int hitX = (int)(localHit.x / multiplier);
@@ -208,6 +213,7 @@ namespace Name.Terrain
 
         public void CreateChunk()
         {
+            // Direction swapper used for correctiong UV-coordinates
             int directionSwapper = 0;
             int vertexIndex = 0;
 
@@ -221,7 +227,7 @@ namespace Name.Terrain
                         // Index of base points, and also adjacent points on cube.
                         float[] p = GetPoints(x, y, z);
 
-                        // Scalars corresponding to vertices.
+                        // Store scalars corresponding to vertices.
                         float[] v = new float[p.Length];
 
                         for (int index = 0; index < p.Length; ++index)
@@ -229,8 +235,11 @@ namespace Name.Terrain
                             v[index] = voxels[(int)p[index]].value;
                         }
 
+                        // Initialize cubeindex
                         int cubeIndex = 0;
 
+                        // First part of the algorithm uses a table which maps the vertices under the isosurface to the
+                        // intersecting edges. An 8 bit index is formed where each bit corresponds to a vertex.
                         for(int index = 0; index < v.Length; ++index)
                         {
                             cubeIndex |= v[index] < isolevel ? resolutions[index] : 0;
@@ -238,6 +247,7 @@ namespace Name.Terrain
 
                         int bits = Terrain3DTables.EdgeTable[cubeIndex];
 
+                        // If no edges are crossed, continue to the next iteration.
                         if (bits == 0)
                         {
                             continue;
@@ -247,6 +257,10 @@ namespace Name.Terrain
 
                         int resValue = 1;
 
+                        // Check which edges are crossed and estimate the point location with a weighted average of scalar values at edge endpoints. 
+                        // Cases 1 - 8          Horizontal edges at bottom of the cube
+                        // Cases 16 - 128       Horizontal edges at top of the cube
+                        // Cases 256 - 2048     Vertical edges of the cubes
                         for (int index = 0; index < 12; ++index)
                         {
                             if((bits & resValue) != 0)
