@@ -72,6 +72,75 @@ namespace NameEditor.Terrain
             GUILayout.EndHorizontal();
         }
 
+        private void OnEnable()
+        {
+            Terrain3D terrain3D = (Terrain3D)target;
+            terrain3D.Initialize();
+            terrain3D.Refresh();
+            Tools.hidden = true;
+        }
+
+        private void OnDisable()
+        {
+            Terrain3D terrain3D = (Terrain3D)target;
+            terrain3D.Refresh();
+            Tools.hidden = false;
+        }
+
+        private void OnSceneGUI()
+        {
+            Terrain3D terrain3D = (Terrain3D)target;
+
+            Event e = Event.current;
+
+            if ((e.type == EventType.MouseDown || e.type == EventType.MouseDrag) && e.button == 0)
+            {
+                int controlId = GUIUtility.GetControlID(FocusType.Passive);
+                GUIUtility.hotControl = controlId;
+
+                // Cast a ray through a screen point and return the hit point
+                Camera cam = Camera.current;
+                if (!cam)
+                {
+                    return;
+                }
+
+                SceneView sceneView = SceneView.currentDrawingSceneView;
+                if (!sceneView)
+                {
+                    return;
+                }
+
+                Vector3 mousePosition = e.mousePosition;
+                mousePosition.y = sceneView.camera.pixelHeight - e.mousePosition.y;
+
+
+                Ray ray = cam.ScreenPointToRay(mousePosition);
+                RaycastHit hit;
+                if (Physics.Raycast(ray, out hit, Mathf.Infinity))
+                {
+                    Debug.Log("Test");
+
+                    Debug.DrawLine(ray.origin, hit.point);
+
+                    // Transform the hit point from world space to local space
+                    Vector3 localHit = terrain3D.transform.InverseTransformPoint(hit.point);
+                    TerrainChunk chunk = terrain3D.terrainChunk;
+            
+                    int hitX = (int)(localHit.x / chunk.multiplier);
+                    int hitY = (int)(localHit.y / chunk.multiplier);
+                    int hitZ = (int)(localHit.z / chunk.multiplier);
+
+                    chunk.voxels[hitX + chunk.size * hitY + chunk.size2 * hitZ].value += 0.5f * Time.deltaTime;
+                    chunk.voxels[(hitX + chunk.size * hitY + chunk.size2 * hitZ) + chunk.size].value += 0.1f * Time.deltaTime;
+
+                    Refresh();
+                }
+
+                e.Use();
+            }
+        }
+
         [MenuItem("GameObject/Create Other/Terrain3D")]
         private static void Create()
         {
@@ -93,9 +162,16 @@ namespace NameEditor.Terrain
             terrain3D.resolution = EditorGUILayout.IntField("Resolution", terrain3D.resolution);
         }
 
+        private void Initialize()
+        {
+            Terrain3D terrain3D = (Terrain3D)target;
+            terrain3D.Initialize();
+        }
+
         private void Refresh()
         {
             Terrain3D terrain3D = (Terrain3D)target;
+            terrain3D.Refresh();
         }
     }
 }
