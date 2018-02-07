@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using Name.Terrain;
 
 namespace NameEditor.Terrain
 {
@@ -16,6 +17,8 @@ namespace NameEditor.Terrain
         };
 
         private int selectedElevationTool = 0;
+
+        bool isMouseIsDown = false;
 
         private Terrain3DBrush brush = new Terrain3DBrush();
         #endregion
@@ -64,6 +67,34 @@ namespace NameEditor.Terrain
 
                 default:
                     break;
+            }
+        }
+
+        public void Update(Terrain3D terrain3D)
+        {
+            Event e = Event.current;
+
+            if ((e.type == EventType.MouseDown) && e.button == 0)
+            {
+                isMouseIsDown = true;
+                GUIUtility.hotControl = 0;
+            }
+
+            if (((e.type == EventType.MouseUp) && e.button == 0) || e.alt)
+            {
+                isMouseIsDown = false;
+            }
+
+            if (isMouseIsDown)
+            {
+                BrushHit[] hits = brush.Paint(terrain3D);
+
+                for (int i = 0; i < hits.Length; ++i)
+                {
+                    hits[i].voxel.value += hits[i].influence;
+                }
+
+                terrain3D.Refresh();
             }
         }
     }
