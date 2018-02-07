@@ -75,8 +75,10 @@ namespace NameEditor.Terrain
         [MenuItem("GameObject/Create Other/Terrain3D")]
         private static void Create()
         {
-            GameObject terrain3D = new GameObject("Terrain3D");
-            terrain3D.AddComponent(typeof(Terrain3D));
+            GameObject terrain3DGameObject = new GameObject("Terrain3D");
+            Terrain3D terrain3D = (Terrain3D)terrain3DGameObject.AddComponent(typeof(Terrain3D));
+            terrain3D.Initialize();
+            terrain3D.Refresh();
             Terrain3DObject terrain3DObject = CreateInstance<Terrain3DObject>();
             AssetDatabase.CreateAsset(terrain3DObject, "Assets/Terrain3D.asset");
             AssetDatabase.SaveAssets();
