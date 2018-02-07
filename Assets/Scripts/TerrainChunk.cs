@@ -17,7 +17,10 @@ namespace Name.Terrain
         }
 
     }
+}
 
+namespace Name.Terrain
+{
     [RequireComponent(typeof(MeshRenderer), typeof(MeshFilter), typeof(MeshCollider))]
     public class TerrainChunk : MonoBehaviour
     {
@@ -30,9 +33,7 @@ namespace Name.Terrain
         #endregion
 
         #region Private Variables
-
         private List<Voxel> voxels = new List<Voxel>();
-        private List<float> values = new List<float>();
 
         private List<Vector3> vertices = new List<Vector3>();
         private List<Vector2> uvs = new List<Vector2>();
@@ -91,8 +92,8 @@ namespace Name.Terrain
                     {
                         if (hitX < size - 1 && hitY < size - 1 && hitZ < size - 1)
                         {
-                            values[hitX + size * hitY + size2 * hitZ] -= strength;
-                            values[(hitX + size * hitY + size2 * hitZ) + size] -= strength * Time.deltaTime;
+                            voxels[hitX + size * hitY + size2 * hitZ].value -= strength;
+                            voxels[(hitX + size * hitY + size2 * hitZ) + size].value -= strength * Time.deltaTime;
                             CreateChunk();
                         }
                     }
@@ -110,8 +111,8 @@ namespace Name.Terrain
                     int hitY = (int)(localHit.y / multiplier);
                     int hitZ = (int)(localHit.z / multiplier);
 
-                    values[hitX + size * hitY + size2 * hitZ] += addStrength;
-                    values[(hitX + size * hitY + size2 * hitZ) + size] += addStrength * Time.deltaTime;
+                    voxels[hitX + size * hitY + size2 * hitZ].value += addStrength;
+                    voxels[(hitX + size * hitY + size2 * hitZ) + size].value += addStrength * Time.deltaTime;
 
                     CreateChunk();
                 }
@@ -122,7 +123,7 @@ namespace Name.Terrain
         {
             foreach (Voxel voxel in voxels)
             {
-                Gizmos.color = Color.red;
+                Gizmos.color = new Color(voxel.value, voxel.value, voxel.value);
                 Gizmos.DrawSphere(voxel.position, 0.5f);
             }
         }
@@ -139,7 +140,6 @@ namespace Name.Terrain
                         float coordY = axisMin + axisRange * y / (size - 1);
                         float coordZ = axisMin + axisRange * z / (size - 1);
 
-                        voxels.Add(new Voxel(coordX, coordY, coordZ));
 
                         int value = -1;
                         float wall = 0;
@@ -148,7 +148,7 @@ namespace Name.Terrain
                             value = (int)wall;
                         }
 
-                        values.Add(value);
+                        voxels.Add(new Voxel(coordX, coordY, coordZ, value));
                     }
                 }
             }
@@ -173,14 +173,29 @@ namespace Name.Terrain
         {
             float[] points = new float[8];
 
-            points[0] = x + size * y + size2 * z;   // Point
-            points[1] = points[0] + 1;              // PointX
-            points[2] = points[0] + size;           // PointY
-            points[3] = points[2] + 1;              // PointXY
-            points[4] = points[0] + size2;          // PointZ
-            points[5] = points[1] + size2;          // PointXZ
-            points[6] = points[2] + size2;          // PointYZ
-            points[7] = points[3] + size2;          // PointXYZ
+            // Point.
+            points[0] = x + size * y + size2 * z;
+
+            // PointX.
+            points[1] = points[0] + 1;
+
+            // PointY.
+            points[2] = points[0] + size;
+
+            // PointXY.
+            points[3] = points[2] + 1;
+
+            // PointZ.
+            points[4] = points[0] + size2;
+
+            // PointXZ.
+            points[5] = points[1] + size2;
+
+            // PointYZ.
+            points[6] = points[2] + size2;
+
+            // PointXYZ.
+            points[7] = points[3] + size2;
 
             return points;
         }
@@ -205,7 +220,7 @@ namespace Name.Terrain
 
                         for (int index = 0; index < p.Length; ++index)
                         {
-                            v[index] = values[(int)p[index]];
+                            v[index] = voxels[(int)p[index]].value;
                         }
 
                         int cubeIndex = 0;
@@ -215,7 +230,7 @@ namespace Name.Terrain
                             cubeIndex |= v[index] < isolevel ? resolutions[index] : 0;
                         }
 
-                        int bits = CubeTables.EdgeTable[cubeIndex];
+                        int bits = Terrain3DTables.EdgeTable[cubeIndex];
 
                         if (bits == 0)
                         {
@@ -240,11 +255,11 @@ namespace Name.Terrain
                         cubeIndex <<= 4;
 
                         int i = 0;
-                        while (CubeTables.TriTable[cubeIndex + i] != -1)
+                        while (Terrain3DTables.TriTable[cubeIndex + i] != -1)
                         {
-                            int index1 = CubeTables.TriTable[cubeIndex + i];
-                            int index2 = CubeTables.TriTable[cubeIndex + i + 1];
-                            int index3 = CubeTables.TriTable[cubeIndex + i + 2];
+                            int index1 = Terrain3DTables.TriTable[cubeIndex + i];
+                            int index2 = Terrain3DTables.TriTable[cubeIndex + i + 1];
+                            int index3 = Terrain3DTables.TriTable[cubeIndex + i + 2];
 
                             vertices.Add(vertexList[index1]);
                             vertices.Add(vertexList[index2]);
@@ -272,10 +287,6 @@ namespace Name.Terrain
                             vertexIndex += 3;
                             i += 3;
                         }
-
-                        // Release allocated objects...?
-                        p = null;
-                        v = null;
                     }
                 }
             }
@@ -296,5 +307,4 @@ namespace Name.Terrain
         }
         #endregion
     }
-
 }
