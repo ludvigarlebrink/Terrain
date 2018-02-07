@@ -4,6 +4,23 @@ using UnityEngine;
 
 namespace Name.Terrain
 {
+    public struct VertPoint
+    {
+        public int[] value;
+
+        public VertPoint(int size)
+        {
+            value = new int[size];
+
+            for (int i = 0; i < size; ++i)
+                value[i] = 0;
+        }
+
+    }
+}
+
+namespace Name.Terrain
+{
     [RequireComponent(typeof(MeshRenderer), typeof(MeshFilter), typeof(MeshCollider))]
     public class TerrainChunk : MonoBehaviour
     {
@@ -16,20 +33,6 @@ namespace Name.Terrain
         #endregion
 
         #region Private Variables
-
-        public struct VertPoint
-        {
-            public int[] value;
-
-            public VertPoint(int size)
-            {
-                value = new int[size];
-
-                for (int i = 0; i < size; ++i)
-                    value[i] = 0;
-            }     
-        }
-
         private List<Voxel> voxels = new List<Voxel>();
 
         private List<Vector3> vertices = new List<Vector3>();
@@ -304,5 +307,4 @@ namespace Name.Terrain
         }
         #endregion
     }
-
 }
