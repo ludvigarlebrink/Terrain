@@ -33,6 +33,10 @@ namespace Name.Terrain
         public Vector3 offset = new Vector3(0, 0, 0);
 
         public List<Voxel> voxels = new List<Voxel>();
+
+        public int size = 15;
+        public int multiplier;
+        public int size2;
         #endregion
 
         #region Private Variables
@@ -44,9 +48,6 @@ namespace Name.Terrain
         private int[] resolutions = { 1, 2, 8, 4, 16, 32, 128, 64 };
         private VertPoint[] vertPoint = new VertPoint[12];
         
-        public int size = 15;
-        public int multiplier;
-        public int size2;
         private int isolevel = 0;
         private Mesh mesh;
 
@@ -57,61 +58,7 @@ namespace Name.Terrain
         private Camera cam;
         #endregion
 
-        #region Public Methods
-        #endregion
-
         #region Private Methods
-        private void Update()
-        {
-        //    // Reduce block when right mouse button is pressed.
-        //    if (Input.GetMouseButton(1))
-        //    {
-        //        // Cast a ray through a screen point and return the hit point
-        //        Ray ray = cam.ScreenPointToRay(Input.mousePosition);
-        //        RaycastHit hit;
-        //        if (Physics.Raycast(ray, out hit, 999.0f))
-        //        {
-        //            // Transform the hit point from world space to local space
-        //            Vector3 localHit = transform.InverseTransformPoint(hit.point);
-        //
-        //            int hitX = (int)(localHit.x / multiplier);
-        //            int hitY = (int)(localHit.y / multiplier);
-        //            int hitZ = (int)(localHit.z / multiplier);
-        //
-        //            if (hitX >= 0 && hitY > 0 && hitZ >= 0)
-        //            {
-        //                if (hitX < size - 1 && hitY < size - 1 && hitZ < size - 1)
-        //                {
-        //                    voxels[hitX + size * hitY + size2 * hitZ].value -= strength;
-        //                    voxels[(hitX + size * hitY + size2 * hitZ) + size].value -= strength * Time.deltaTime;
-        //                    CreateChunk();
-        //                }
-        //            }
-        //        }
-        //    }
-        //    // Raise block when left mouse is pressed.
-        //    else if (Input.GetMouseButton(0))
-        //    {
-        //        // Cast a ray through a screen point and return the hit point
-        //        Ray ray = cam.ScreenPointToRay(Input.mousePosition);
-        //        RaycastHit hit;
-        //        if (Physics.Raycast(ray, out hit, 999.0f))
-        //        {
-        //            // Transform the hit point from world space to local space
-        //            Vector3 localHit = transform.InverseTransformPoint(hit.point);
-        //
-        //            int hitX = (int)(localHit.x / multiplier);
-        //            int hitY = (int)(localHit.y / multiplier);
-        //            int hitZ = (int)(localHit.z / multiplier);
-        //
-        //            voxels[hitX + size * hitY + size2 * hitZ].value += addStrength;
-        //            voxels[(hitX + size * hitY + size2 * hitZ) + size].value += addStrength * Time.deltaTime;
-        //
-        //            CreateChunk();
-        //        }
-        //    }
-        }
-
         public void Initialize()
         {
             multiplier = (int)(axisMax / size);
@@ -143,6 +90,18 @@ namespace Name.Terrain
                 }
             }
 
+            for (int i = 0, z = 0; z < size; ++z)
+            {
+                for (int y = 0; y < size; ++y)
+                {
+                    for (int x = 0; x < size; ++x, ++i)
+                    {
+
+                        // voxels.Add(new Voxel(coordX, coordY, coordZ, value));
+                    }
+                }
+            }
+
             // Initialize VertPoint. Used to store scalar values and index of points for each case.
             vertPoint[0].value = new int[] { 0, 1, 0, 0, 1 };
             vertPoint[1].value = new int[] { 1, 3, 1, 1, 3 };
@@ -160,21 +119,21 @@ namespace Name.Terrain
 
         private void OnDrawGizmos()
         {
-            foreach (Voxel voxel in voxels)
-            {
-                float color = Mathf.Clamp(Mathf.Abs(voxel.value), 0.0f, 1.0f);
-                if (voxel.value < 0.0f)
-                {
-                    float secondaryColor = 1.0f - color;
-                    Gizmos.color = new Color(color, 0.5f, 0.5f);
-                }
-                else
-                {
-                    float secondaryColor = 1.0f - color;
-                    Gizmos.color = new Color(0.5f, color, 0.5f);
-                }
-                Gizmos.DrawSphere(voxel.position, 0.5f);
-            }
+        //    foreach (Voxel voxel in voxels)
+        //    {
+        //        float color = Mathf.Clamp(Mathf.Abs(voxel.value), 0.0f, 1.0f);
+        //        if (voxel.value < 0.0f)
+        //        {
+        //            float secondaryColor = 1.0f - color;
+        //            Gizmos.color = new Color(color, 0.5f, 0.5f);
+        //        }
+        //        else
+        //        {
+        //            float secondaryColor = 1.0f - color;
+        //            Gizmos.color = new Color(0.5f, color, 0.5f);
+        //        }
+        //        Gizmos.DrawSphere(voxel.position, 0.5f);
+        //    }
         }
 
         private float[] GetPoints(int x, int y, int z)
