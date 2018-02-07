@@ -101,12 +101,15 @@ namespace Name.Terrain
                     }
                 }
             }
+            // Raise block when left mouse is pressed.
             else if (Input.GetMouseButton(0))
             {
+                // Cast a ray through a screen point and return the hit point
                 Ray ray = cam.ScreenPointToRay(Input.mousePosition);
                 RaycastHit hit;
                 if (Physics.Raycast(ray, out hit, 999f))
                 {
+                    // Transform the hit point from world space to local space
                     Vector3 localHit = transform.InverseTransformPoint(hit.point);
 
                     int hitX = (int)(localHit.x / multiplier);
@@ -141,7 +144,6 @@ namespace Name.Terrain
                         float coordX = axisMin + axisRange * x / (size - 1);
                         float coordY = axisMin + axisRange * y / (size - 1);
                         float coordZ = axisMin + axisRange * z / (size - 1);
-
 
                         float value = -1.0f;
                         float wall = 0.0f;
