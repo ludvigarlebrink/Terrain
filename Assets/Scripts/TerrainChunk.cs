@@ -55,7 +55,7 @@ namespace Name.Terrain
         private float axisMax = 120.0f;
         private float axisRange;
 
-        private Camera cam;
+        private Profiler profiler = new Profiler();
         #endregion
 
         #region Private Methods
@@ -150,6 +150,8 @@ namespace Name.Terrain
 
         public void CreateChunk()
         {
+            profiler.Start();
+
             // Direction swapper used for correctiong UV-coordinates
             int directionSwapper = 0;
             int vertexIndex = 0;
@@ -169,7 +171,7 @@ namespace Name.Terrain
 
                         for (int j = 0; j < basePoints.Length; ++j)
                         {
-                            storedScalars[j] = voxels[(int)basePoints[j]].value;
+                            storedScalars[j] = voxels[(int)basePoints[j]].Value;
                         }
 
                         // Initialize cubeindex
@@ -247,6 +249,7 @@ namespace Name.Terrain
                 }
             }
 
+
             // Build the Mesh:
             mesh.Clear();
 
@@ -254,12 +257,14 @@ namespace Name.Terrain
             mesh.triangles = triangles.ToArray();
             mesh.uv = uvs.ToArray();
 
-            mesh.RecalculateNormals(60);
+            mesh.RecalculateNormals();
             GetComponent<MeshCollider>().sharedMesh = mesh;
 
             vertices.Clear();
             uvs.Clear();
             triangles.Clear();
+
+            profiler.Stop();
         }
         #endregion
     }

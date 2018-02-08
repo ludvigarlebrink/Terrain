@@ -5,9 +5,29 @@ namespace Name.Terrain
     public class Voxel
     {
         #region Public Variables
-        public bool state;
         public Vector3 position;
-        public float value;
+        private float value;
+        public float Value
+        {
+            get
+            {
+                return value;
+            }
+
+            set
+            {
+                if (value > 1.0f)
+                {
+                    this.value = 1.0f;
+                }
+                else if (value < -1.0f)
+                {
+                    this.value = -1.0f;
+                }
+
+                this.value = value;
+            }
+        }
         #endregion
 
         #region Constructors
@@ -18,7 +38,7 @@ namespace Name.Terrain
         public Voxel(float x, float y, float z, float value)
         {
             position = new Vector3(x, y, z);
-            this.value = value;
+            this.Value = value;
         }
         #endregion
     }

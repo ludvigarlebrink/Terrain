@@ -35,6 +35,6 @@ public class Profiler
             return 0.0d;
         }
 
-        return stopwatch.ElapsedMilliseconds / times;
+        return stopwatch.Elapsed.TotalMilliseconds / times;
     }
 }
