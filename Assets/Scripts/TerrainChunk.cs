@@ -30,9 +30,10 @@ namespace Name.Terrain
         public float addStrength = 0.5f;
         public float zoomSpeed = 15.0f;
 
-        public Vector3 offset = new Vector3(0, 0, 0);
-
         public List<Voxel> voxels = new List<Voxel>();
+
+        // Compute shader for GPU solution.
+        public ComputeShader marchingCubeCS;
 
         public int size = 15;
         public int multiplier;
@@ -54,6 +55,18 @@ namespace Name.Terrain
         private float axisMin = 0.0f;
         private float axisMax = 120.0f;
         private float axisRange;
+
+        // Size of the voxel array for each dimension.
+        private const int voxelArrSize = 64;
+
+        // Size of the buffer to hold the vertices.
+        // This is the maximum number of vertices marching cubes can produce, 5 triangles for each voxel.
+        private const int vertexBufferSize = voxelArrSize * voxelArrSize * voxelArrSize * 3 * 5;
+
+        // GPU data buffers.
+        private ComputeBuffer cubeEdgeFlags;
+        private ComputeBuffer triangleConnectionTable;
+        private ComputeBuffer meshBuffer;
 
         private Camera cam;
         #endregion

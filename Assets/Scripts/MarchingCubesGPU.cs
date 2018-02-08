@@ -49,7 +49,10 @@ namespace Name.Terrain {
             triangleConnectionTable = new ComputeBuffer(256 * 16, sizeof(int));
             triangleConnectionTable.SetData(Terrain3DTables.TriTable);
 
-            // Set buffer and dispatch
+            // Set variables
+            //marchingCubeCS.SetInt()
+
+            // Set buffers
             marchingCubeCS.SetBuffer(0, "_Buffer", meshBuffer);
             marchingCubeCS.SetBuffer(0, "_CubeEdgeFlags", cubeEdgeFlags);
             marchingCubeCS.SetBuffer(0, "_TriangleConnectionTable", triangleConnectionTable);
