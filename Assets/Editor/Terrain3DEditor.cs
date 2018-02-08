@@ -23,6 +23,8 @@ namespace NameEditor.Terrain
         private Terrain3DElevation elevation = new Terrain3DElevation();
         private Terrain3DPaint paint = new Terrain3DPaint();
 
+        private AutomatedTest automatedTest = new AutomatedTest();
+
         private bool isRunningTest = false;
         private bool testIsDone = false;
 
@@ -80,18 +82,22 @@ namespace NameEditor.Terrain
             {
                 if (GUILayout.Button("Stop Test"))
                 {
+                    EditorApplication.update -= Update;
                     isRunningTest = false;
                     terrain3D.Initialize();
                     terrain3D.Refresh();
+
                 }
             }
             else
             {
                 if (GUILayout.Button("Run Test"))
                 {
+                    EditorApplication.update += Update;
                     isRunningTest = true;
                     terrain3D.Initialize();
                     terrain3D.Refresh();
+                    automatedTest.Start();
                 }
             }
         }
@@ -113,17 +119,17 @@ namespace NameEditor.Terrain
             Tools.hidden = false;
         }
 
+        private void Update()
+        {
+            Terrain3D terrain3D = (Terrain3D)target;
+            automatedTest.Update(terrain3D);
+        }
+
         private void OnSceneGUI()
         {
             Terrain3D terrain3D = (Terrain3D)target;
 
             Event e = Event.current;
-
-            if (isRunningTest)
-            {
-
-                return;
-            }
 
             switch (selectedTab)
             {
