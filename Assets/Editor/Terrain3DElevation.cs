@@ -91,7 +91,7 @@ namespace NameEditor.Terrain
 
                 for (int i = 0; i < hits.Length; ++i)
                 {
-                    hits[i].voxel.value += hits[i].influence;
+                    hits[i].voxel.Value += hits[i].influence;
                 }
 
                 terrain3D.Refresh();
