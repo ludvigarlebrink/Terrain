@@ -75,13 +75,13 @@ namespace NameEditor.Terrain
                 int hitIndex = hitX + chunk.size * hitY + chunk.size2 * hitZ;
 
                 brushHits.Add(new BrushHit(chunk.voxels[hitIndex], strength * 0.1f * Time.deltaTime));
-                brushHits.Add(new BrushHit(chunk.voxels[hitIndex + 1], strength * 0.1f * Time.deltaTime));
-                //brushHits.Add(new BrushHit(chunk.voxels[hitIndex + 2], strength * 0.1f * Time.deltaTime));
-                brushHits.Add(new BrushHit(chunk.voxels[hitIndex - 1], strength * 0.1f * Time.deltaTime));
-                //brushHits.Add(new BrushHit(chunk.voxels[hitIndex - 2], strength * 0.1f * Time.deltaTime));
-
-                brushHits.Add(new BrushHit(chunk.voxels[hitIndex + chunk.size2], strength * 0.1f * Time.deltaTime));
-                brushHits.Add(new BrushHit(chunk.voxels[hitIndex - chunk.size2], strength * 0.1f * Time.deltaTime));
+             //   brushHits.Add(new BrushHit(chunk.voxels[hitIndex + 1], strength * 0.1f * Time.deltaTime));
+             //   //brushHits.Add(new BrushHit(chunk.voxels[hitIndex + 2], strength * 0.1f * Time.deltaTime));
+             //   brushHits.Add(new BrushHit(chunk.voxels[hitIndex - 1], strength * 0.1f * Time.deltaTime));
+             //   //brushHits.Add(new BrushHit(chunk.voxels[hitIndex - 2], strength * 0.1f * Time.deltaTime));
+             //
+             //   brushHits.Add(new BrushHit(chunk.voxels[hitIndex + chunk.size2], strength * 0.1f * Time.deltaTime));
+             //   brushHits.Add(new BrushHit(chunk.voxels[hitIndex - chunk.size2], strength * 0.1f * Time.deltaTime));
                 //brushHits.Add(new BrushHit(chunk.voxels[hitIndex + 1 + chunk.size2], strength * 0.1f * Time.deltaTime));
                 //brushHits.Add(new BrushHit(chunk.voxels[hitIndex - 1 - chunk.size2], strength * 0.1f * Time.deltaTime));
 
