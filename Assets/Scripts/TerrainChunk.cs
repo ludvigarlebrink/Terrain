@@ -117,25 +117,6 @@ namespace Name.Terrain
             vertPoint[11].value = new int[] { 2, 6, 2, 2, 6 };
         }
 
-        private void OnDrawGizmos()
-        {
-        //    foreach (Voxel voxel in voxels)
-        //    {
-        //        float color = Mathf.Clamp(Mathf.Abs(voxel.value), 0.0f, 1.0f);
-        //        if (voxel.value < 0.0f)
-        //        {
-        //            float secondaryColor = 1.0f - color;
-        //            Gizmos.color = new Color(color, 0.5f, 0.5f);
-        //        }
-        //        else
-        //        {
-        //            float secondaryColor = 1.0f - color;
-        //            Gizmos.color = new Color(0.5f, color, 0.5f);
-        //        }
-        //        Gizmos.DrawSphere(voxel.position, 0.5f);
-        //    }
-        }
-
         private float[] GetPoints(int x, int y, int z)
         {
             float[] points = new float[8];
