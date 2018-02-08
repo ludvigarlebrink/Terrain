@@ -23,6 +23,9 @@ namespace NameEditor.Terrain
         private Terrain3DElevation elevation = new Terrain3DElevation();
         private Terrain3DPaint paint = new Terrain3DPaint();
 
+        private bool isRunningTest = false;
+        private bool testIsDone = false;
+
         public override void OnInspectorGUI()
         {
             Terrain3D terrain3D = (Terrain3D)target;
@@ -70,6 +73,27 @@ namespace NameEditor.Terrain
             }
 
             GUILayout.EndHorizontal();
+
+            EditorGUILayout.LabelField("Profiling", EditorStyles.boldLabel);
+
+            if (isRunningTest)
+            {
+                if (GUILayout.Button("Stop Test"))
+                {
+                    isRunningTest = false;
+                    terrain3D.Initialize();
+                    terrain3D.Refresh();
+                }
+            }
+            else
+            {
+                if (GUILayout.Button("Run Test"))
+                {
+                    isRunningTest = true;
+                    terrain3D.Initialize();
+                    terrain3D.Refresh();
+                }
+            }
         }
         
         private void OnEnable()
@@ -95,6 +119,12 @@ namespace NameEditor.Terrain
             Terrain3D terrain3D = (Terrain3D)target;
 
             Event e = Event.current;
+
+            if (isRunningTest)
+            {
+
+                return;
+            }
 
             switch (selectedTab)
             {

@@ -1,0 +1,33 @@
+﻿#pragma kernel CSMain
+
+#define thread_group_size_x 8
+#define thread_group_size_y 1
+
+//A struct that simple holds a position
+struct PositionStruct
+{
+	float3 pos;
+};
+
+RWStructuredBuffer<PositionStruct> output;
+
+float3 UpdateVertex(float3 p, int idx)
+{
+	//Do your stuff here
+	return p;
+}
+
+[numthreads(thread_group_size_x, thread_group_size_y, 1)]
+
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+	//int idx = id.x + id.y * thread_group_size_x * 32;
+	//float spacing = 1.0;
+
+	float3 pos = float3(id.x, id.y, id.z);
+
+	//pos = UpdateVertex(pos, idx);
+
+	output[id.x].pos = pos;
+	//output[id.x].pos = pos;
+}
