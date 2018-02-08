@@ -31,14 +31,16 @@ namespace Name.Terrain
         #endregion
 
         #region Constructors
+
         public Voxel()
         {
+
         }
 
         public Voxel(float x, float y, float z, float value)
         {
             position = new Vector3(x, y, z);
-            this.Value = value;
+            this.value = value;
         }
         #endregion
     }
