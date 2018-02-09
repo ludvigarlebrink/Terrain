@@ -1,5 +1,11 @@
 ﻿#pragma kernel CSMain
 
+struct Vert
+{
+    float4 position;
+    float2 uv;
+};
+
 struct Voxel
 {
     float3 position;
@@ -18,9 +24,8 @@ StructuredBuffer<int> _TriangleConnectionTable;
 StructuredBuffer<int> _CubeEdgeFlags;
 StructuredBuffer<Voxel> _Voxels;
 
-RWStructuredBuffer<float3> _Vertices;
+RWStructuredBuffer<Vert> _Vertices;
 RWStructuredBuffer<int> _Triangles;
-RWStructuredBuffer<float2> _UVs;
 
 static int resolutions[8] =
 {
@@ -113,9 +118,9 @@ void CSMain (uint3 id : SV_DispatchThreadID)
         int index2 = _TriangleConnectionTable[cubeIndex + counter + 1];
         int index3 = _TriangleConnectionTable[cubeIndex + counter + 2];
 
-        _Vertices[idx * 15 + (3 * counter + 0)] = vertexList[index1];
-        _Vertices[idx * 15 + (3 * counter + 1)] = vertexList[index2];
-        _Vertices[idx * 15 + (3 * counter + 2)] = vertexList[index3];
+        _Vertices[idx * 15 + (3 * counter + 0)].position = float4(vertexList[index1], 1.0f);
+        _Vertices[idx * 15 + (3 * counter + 1)].position = float4(vertexList[index2], 1.0f);
+        _Vertices[idx * 15 + (3 * counter + 2)].position = float4(vertexList[index3], 1.0f);
 
         _Triangles[idx * 15 + (3 * counter + 0)] = vertexIndex;
         _Triangles[idx * 15 + (3 * counter + 1)] = vertexIndex + 1;
@@ -125,15 +130,15 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 
         if (directionSwapper == 0)
         {
-            _UVs[idx * 15 + (3 * counter + 0)] = float2(0, 0);
-            _UVs[idx * 15 + (3 * counter + 1)] = float2(0, 1);
-            _UVs[idx * 15 + (3 * counter + 2)] = float2(1, 1);
+            _Vertices[idx * 15 + (3 * counter + 0)].uv = float2(0, 0);
+            _Vertices[idx * 15 + (3 * counter + 1)].uv = float2(0, 1);
+            _Vertices[idx * 15 + (3 * counter + 2)].uv = float2(1, 1);
         }
         else
         {
-            _UVs[idx * 15 + (3 * counter + 0)] = float2(1, 0);
-            _UVs[idx * 15 + (3 * counter + 1)] = float2(0, 0);
-            _UVs[idx * 15 + (3 * counter + 2)] = float2(1, 1);
+            _Vertices[idx * 15 + (3 * counter + 0)].uv = float2(1, 0);
+            _Vertices[idx * 15 + (3 * counter + 1)].uv = float2(0, 0);
+            _Vertices[idx * 15 + (3 * counter + 2)].uv = float2(1, 1);
         }
 
         vertexIndex += 3;

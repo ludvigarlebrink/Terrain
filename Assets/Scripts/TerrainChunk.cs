@@ -4,6 +4,15 @@ using UnityEngine;
 
 namespace Name.Terrain
 {
+    namespace Name.Terrain
+    {
+        struct Vert
+        {
+            public Vector4 position;
+            public Vector2 uv;
+        }
+    }
+
     [RequireComponent(typeof(MeshRenderer), typeof(MeshFilter), typeof(MeshCollider))]
     public class TerrainChunk : MonoBehaviour
     {
@@ -65,6 +74,125 @@ namespace Name.Terrain
         private ComputeBuffer voxelBuffer;
 
         private Profiler profiler = new Profiler();
+        #endregion
+
+        #region Public Methods
+        public void CreateChunkCPU()
+        {
+            profiler.Start();
+
+            // Direction swapper used for correctiong UV-coordinates
+            int directionSwapper = 0;
+            int vertexIndex = 0;
+
+            int count = size - 1;
+            for (int z = 0; z < count; ++z)
+            {
+                for (int y = 0; y < count; ++y)
+                {
+                    for (int x = 0; x < count; ++x)
+                    {
+                        // Index of base points, and also adjacent points on cube.
+                        float[] basePoints = GetPoints(x, y, z);
+
+                        // Store scalars corresponding to vertices.
+                        float[] storedScalars = new float[basePoints.Length];
+
+                        for (int j = 0; j < basePoints.Length; ++j)
+                        {
+                            storedScalars[j] = voxels[(int)basePoints[j]].Value;
+                        }
+
+                        // Initialize cubeindex
+                        int cubeIndex = 0;
+
+                        // First part of the algorithm uses a table which maps the vertices under the isosurface to the
+                        // intersecting edges. An 8 bit index is formed where each bit corresponds to a vertex.
+                        for (int j = 0; j < storedScalars.Length; ++j)
+                        {
+                            cubeIndex |= storedScalars[j] < isolevel ? resolutions[j] : 0;
+                        }
+
+                        int bits = Terrain3DTables.EdgeTable[cubeIndex];
+
+                        // If no edges are crossed, continue to the next iteration.
+                        if (bits == 0)
+                        {
+                            continue;
+                        }
+
+                        float alpha = 0.5f;
+                        int resValue = 1;
+
+                        // Check which edges are crossed and estimate the point location with a weighted average of scalar values at edge endpoints. 
+                        // Cases 1 - 8          Horizontal edges at bottom of the cube
+                        // Cases 16 - 128       Horizontal edges at top of the cube
+                        // Cases 256 - 2048     Vertical edges of the cubes
+                        for (int index = 0; index < 12; ++index)
+                        {
+                            if ((bits & resValue) != 0)
+                            {
+                                alpha = (isolevel - storedScalars[(int)vertPoint[index].y]) / (storedScalars[(int)vertPoint[index].x] - storedScalars[(int)vertPoint[index].y]);
+                                vertexList[index] = Vector3.Lerp(voxels[(int)basePoints[(int)vertPoint[index].z]].position, voxels[(int)basePoints[(int)vertPoint[index].w]].position, alpha);
+                            }
+
+                            resValue = resValue * 2;
+                        }
+
+                        cubeIndex <<= 4;
+
+                        int i = 0;
+                        while (Terrain3DTables.TriTable[cubeIndex + i] != -1)
+                        {
+                            int index1 = Terrain3DTables.TriTable[cubeIndex + i];
+                            int index2 = Terrain3DTables.TriTable[cubeIndex + i + 1];
+                            int index3 = Terrain3DTables.TriTable[cubeIndex + i + 2];
+
+                            vertices.Add(vertexList[index1]);
+                            vertices.Add(vertexList[index2]);
+                            vertices.Add(vertexList[index3]);
+
+                            triangles.Add(vertexIndex);
+                            triangles.Add(vertexIndex + 1);
+                            triangles.Add(vertexIndex + 2);
+
+                            directionSwapper = 1 - directionSwapper;
+
+                            if (directionSwapper == 0)
+                            {
+                                uvs.Add(new Vector2(0, 0));
+                                uvs.Add(new Vector2(0, 1));
+                                uvs.Add(new Vector2(1, 1));
+                            }
+                            else
+                            {
+                                uvs.Add(new Vector2(1, 0));
+                                uvs.Add(new Vector2(0, 0));
+                                uvs.Add(new Vector2(1, 1));
+                            }
+
+                            vertexIndex += 3;
+                            i += 3;
+                        }
+                    }
+                }
+            }
+
+            // Build the Mesh.
+            BuildMesh(vertices.ToArray(), triangles.ToArray(), uvs.ToArray());
+
+            // Clear lists
+            ClearLists();
+
+            profiler.Stop();
+        }
+
+        public void CreateChunkGPU()
+        {
+            Dispatch();
+
+            ReadBackMesh(vertexBuffer);
+        }
         #endregion
 
         #region Private Methods
@@ -131,8 +259,8 @@ namespace Name.Terrain
 
             // Clear all the mesh vertices to -1
             // Vertices that are generated will have a value of 1
-            float[] val = new float[vertexBufferSize * 3];
-            for (int i = 0; i < vertexBufferSize * 3; ++i)
+            float[] val = new float[vertexBufferSize * 6];
+            for (int i = 0; i < vertexBufferSize * 6; ++i)
             {
                 val[i] = -1.0f;
             }
@@ -141,10 +269,6 @@ namespace Name.Terrain
             // Buffer to hold the triangles generated by marching cube.
             triangleBuffer = new ComputeBuffer(vertexBufferSize, sizeof(int));
             triangleBuffer.SetData(val);
-
-            // Buffer to hold the uv coordinates for each vertex generated by marching cube.
-            uvBuffer = new ComputeBuffer(vertexBufferSize, sizeof(float) * 2);
-            uvBuffer.SetData(val);
 
             // Upload cube edges lookup table.
             cubeEdgeFlags = new ComputeBuffer(256, sizeof(int));
@@ -162,7 +286,6 @@ namespace Name.Terrain
             marchingCubeCS.SetBuffer(0, "_Voxels", voxelBuffer);
             marchingCubeCS.SetBuffer(0, "_Vertices", vertexBuffer);
             marchingCubeCS.SetBuffer(0, "_Triangles", triangleBuffer);
-            marchingCubeCS.SetBuffer(0, "_UVs", uvBuffer);
             marchingCubeCS.SetBuffer(0, "_CubeEdgeFlags", cubeEdgeFlags);
             marchingCubeCS.SetBuffer(0, "_TriangleConnectionTable", triangleConnectionTable);
         }
@@ -231,123 +354,51 @@ namespace Name.Terrain
             return points;
         }
 
-        public void CreateChunk()
+        private void BuildMesh(Vector3[] vertices, int[] triangles, Vector2[] uvs)
         {
-            profiler.Start();
-
-            // Direction swapper used for correctiong UV-coordinates
-            int directionSwapper = 0;
-            int vertexIndex = 0;
-
-            int count = size - 1;
-            for (int z = 0; z < count; ++z)
-            {
-                for (int y = 0; y < count; ++y)
-                {
-                    for (int x = 0; x < count; ++x)
-                    {
-                        // Index of base points, and also adjacent points on cube.
-                        float[] basePoints = GetPoints(x, y, z);
-
-                        // Store scalars corresponding to vertices.
-                        float[] storedScalars = new float[basePoints.Length];
-
-                        for (int j = 0; j < basePoints.Length; ++j)
-                        {
-                            storedScalars[j] = voxels[(int)basePoints[j]].Value;
-                        }
-
-                        // Initialize cubeindex
-                        int cubeIndex = 0;
-
-                        // First part of the algorithm uses a table which maps the vertices under the isosurface to the
-                        // intersecting edges. An 8 bit index is formed where each bit corresponds to a vertex.
-                        for(int j = 0; j < storedScalars.Length; ++j)
-                        {
-                            cubeIndex |= storedScalars[j] < isolevel ? resolutions[j] : 0;
-                        }
-
-                        int bits = Terrain3DTables.EdgeTable[cubeIndex];
-
-                        // If no edges are crossed, continue to the next iteration.
-                        if (bits == 0)
-                        {
-                            continue;
-                        }
-
-                        float alpha = 0.5f;
-                        int resValue = 1;
-
-                        // Check which edges are crossed and estimate the point location with a weighted average of scalar values at edge endpoints. 
-                        // Cases 1 - 8          Horizontal edges at bottom of the cube
-                        // Cases 16 - 128       Horizontal edges at top of the cube
-                        // Cases 256 - 2048     Vertical edges of the cubes
-                        for (int index = 0; index < 12; ++index)
-                        {
-                            if((bits & resValue) != 0)
-                            {
-                                alpha = (isolevel - storedScalars[(int)vertPoint[index].y]) / (storedScalars[(int)vertPoint[index].x] - storedScalars[(int)vertPoint[index].y]);
-                                vertexList[index] = Vector3.Lerp(voxels[(int)basePoints[(int)vertPoint[index].z]].position, voxels[(int)basePoints[(int)vertPoint[index].w]].position, alpha);
-                            }
-
-                            resValue = resValue * 2;
-                        }
-
-                        cubeIndex <<= 4;
-
-                        int i = 0;
-                        while (Terrain3DTables.TriTable[cubeIndex + i] != -1)
-                        {
-                            int index1 = Terrain3DTables.TriTable[cubeIndex + i];
-                            int index2 = Terrain3DTables.TriTable[cubeIndex + i + 1];
-                            int index3 = Terrain3DTables.TriTable[cubeIndex + i + 2];
-
-                            vertices.Add(vertexList[index1]);
-                            vertices.Add(vertexList[index2]);
-                            vertices.Add(vertexList[index3]);
-
-                            triangles.Add(vertexIndex);
-                            triangles.Add(vertexIndex + 1);
-                            triangles.Add(vertexIndex + 2);
-
-                            directionSwapper = 1 - directionSwapper;
-
-                            if (directionSwapper == 0)
-                            {
-                                uvs.Add(new Vector2(0, 0));
-                                uvs.Add(new Vector2(0, 1));
-                                uvs.Add(new Vector2(1, 1));
-                            }
-                            else
-                            {
-                                uvs.Add(new Vector2(1, 0));
-                                uvs.Add(new Vector2(0, 0));
-                                uvs.Add(new Vector2(1, 1));
-                            }
-
-                            vertexIndex += 3;
-                            i += 3;
-                        }
-                    }
-                }
-            }
-
-
             // Build the Mesh:
             mesh.Clear();
-            mesh.vertices = vertices.ToArray();
-            mesh.triangles = triangles.ToArray();
-            mesh.uv = uvs.ToArray();
+            mesh.vertices = vertices;
+            mesh.triangles = triangles;
+            mesh.uv = uvs;
 
             mesh.RecalculateNormals();
             GetComponent<MeshCollider>().sharedMesh = mesh;
+        }
 
+        private void ClearLists()
+        {
             vertices.Clear();
             uvs.Clear();
             triangles.Clear();
-
-            profiler.Stop();
         }
+
+        void ReadBackMesh(ComputeBuffer meshBuffer)
+        {
+            // Get the data out of the vertex buffer
+            Name.Terrain.Vert[] verts = new Name.Terrain.Vert[vertexBufferSize];
+            vertexBuffer.GetData(verts);
+
+            int idx = 0;
+
+            for (int i = 0; i < vertexBufferSize; ++i)
+            {
+                if (verts[i].position.w != -1)
+                {
+                    vertices.Add(verts[i].position);
+                    uvs.Add(verts[i].uv);
+                    triangles.Add(idx++);
+                }
+
+            }
+
+            // Build the Mesh.
+            BuildMesh(vertices.ToArray(), triangles.ToArray(), uvs.ToArray());
+
+            // Clear lists
+            ClearLists();
+        }
+
         #endregion
     }
 }

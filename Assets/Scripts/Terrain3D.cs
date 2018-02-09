@@ -31,7 +31,7 @@ namespace Name.Terrain
                 terrainChunk = gameObject.GetComponent<TerrainChunk>();
             }
 
-            terrainChunk.CreateChunk();
+            terrainChunk.CreateChunkCPU();
         }
 
         private void Awake()
