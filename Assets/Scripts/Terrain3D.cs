@@ -24,6 +24,11 @@ namespace Name.Terrain
             terrainChunk.Initialize();
         }
 
+        public void Shutdown()
+        {
+            terrainChunk.Deallocate();
+        }
+
         public void Refresh()
         {
             if (!terrainChunk)

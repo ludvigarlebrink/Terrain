@@ -112,11 +112,12 @@ namespace NameEditor.Terrain
             // Set selected render state for terrain3D game object's renderer and specify it to be hidden in the editor
             EditorUtility.SetSelectedRenderState(terrain3D.gameObject.GetComponent<Renderer>(), EditorSelectedRenderState.Hidden);
         }
-
+        
         private void OnDisable()
         {
             Terrain3D terrain3D = (Terrain3D)target;
             terrain3D.Refresh();
+            terrain3D.Shutdown();
             Tools.hidden = false;
         }
 

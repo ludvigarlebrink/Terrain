@@ -20,12 +20,14 @@ static int vertexIndex = 0;
 static int directionSwapper = 0;
 static float3 vertexList[12];
 
-StructuredBuffer<int> _TriangleConnectionTable;
-StructuredBuffer<int> _CubeEdgeFlags;
-StructuredBuffer<Voxel> _Voxels;
+StructuredBuffer<float3> _VoxelsPos;
+StructuredBuffer<float> _VoxelsVal;
 
 RWStructuredBuffer<Vert> _Vertices;
 RWStructuredBuffer<int> _Triangles;
+
+StructuredBuffer<int> _TriangleConnectionTable;
+StructuredBuffer<int> _CubeEdgeFlags;
 
 static int resolutions[8] =
 {
@@ -71,7 +73,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     float storedScalars[8];
     for (int i = 0; i < 8; ++i)
     {
-        storedScalars[i] = _Voxels[(int)basePoints[i]].value;
+        storedScalars[i] = _VoxelsVal[(int)basePoints[i]];
     }
 
     // Initialize cube index.
@@ -101,7 +103,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
         if ((bits & resValue) != 0)
         {
             alpha = (_Isolevel - storedScalars[(int)vertPoint[index].y]) / (storedScalars[(int)vertPoint[index].x] - storedScalars[(int)vertPoint[index].y]);
-            vertexList[index] = lerp(_Voxels[(int)basePoints[(int)vertPoint[index].z]].position, _Voxels[(int)basePoints[(int)vertPoint[index].w]].position, alpha);
+            vertexList[index] = lerp(_VoxelsPos[(int)basePoints[(int)vertPoint[index].z]], _VoxelsPos[(int)basePoints[(int)vertPoint[index].w]], alpha);
         }
 
         resValue = resValue * 2;
