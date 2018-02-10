@@ -314,7 +314,7 @@ namespace Name.Terrain
 
         private void Dispatch()
         {
-            marchingCubeCS.Dispatch(0, vertexBufferSize / 8, vertexBufferSize / 8, vertexBufferSize / 8);
+            marchingCubeCS.Dispatch(0, size / 8, size / 8, size / 8);
         }
 
         private void OnDrawGizmos()
@@ -399,7 +399,7 @@ namespace Name.Terrain
         void ReadBackMesh(ComputeBuffer meshBuffer)
         {
             // Get the data out of the vertex buffer
-            Name.Terrain.Vert[] verts = new Name.Terrain.Vert[vertexBufferSize];
+            Vert[] verts = new Vert[vertexBufferSize];
             vertexBuffer.GetData(verts);
 
             int idx = 0;
