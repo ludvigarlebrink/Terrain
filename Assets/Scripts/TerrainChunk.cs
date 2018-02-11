@@ -42,7 +42,7 @@ namespace Name.Terrain
         private int[] resolutions = { 1, 2, 8, 4, 16, 32, 128, 64 };
         
         // X = non-shared scalar value | Y = shared scalar value | Z = first point  | W = second point
-        private static Vector4[] vertPoint = new[]
+        private Vector4[] vertPoint = new[]
         {
             new Vector4(1, 0, 0, 1),
             new Vector4(3, 1, 1, 3),
@@ -137,7 +137,7 @@ namespace Name.Terrain
                                 alpha = (isolevel - storedScalars[(int)vertPoint[index].y]) / (storedScalars[(int)vertPoint[index].x] - storedScalars[(int)vertPoint[index].y]);
                                 vertexList[index] = Vector3.Lerp(voxels[(int)basePoints[(int)vertPoint[index].z]].position, voxels[(int)basePoints[(int)vertPoint[index].w]].position, alpha);
                             }
-
+                            
                             resValue = resValue * 2;
                         }
 
@@ -191,6 +191,8 @@ namespace Name.Terrain
 
         public void CreateChunkGPU()
         {
+            InitializeComputeResources();
+
             Dispatch();
 
             ReadBackMesh(vertexBuffer);
@@ -244,9 +246,9 @@ namespace Name.Terrain
                 }
             }
 
-            InitializeComputeResources();
+            // InitializeComputeResources();
         }
-
+        
         public void Deallocate()
         {
             cubeEdgeFlags.Release();
@@ -299,15 +301,18 @@ namespace Name.Terrain
             triangleConnectionTable.SetData(Terrain3DTables.TriTable);
 
             // Set variables
-            marchingCubeCS.SetInt("_Size", size);
-            marchingCubeCS.SetInt("_Size2", size2);
-            marchingCubeCS.SetFloat("_Isolevel", isolevel);
-            
+            marchingCubeCS.SetInt("_Width", size);
+            marchingCubeCS.SetInt("_Height", size);
+            marchingCubeCS.SetInt("_Depth", size);
+            marchingCubeCS.SetInt("_Border", 1);
+            marchingCubeCS.SetFloat("_Target", 0.0f);
+
+            marchingCubeCS.SetVectorArray("_VertPoint", vertPoint);
+
             // Set buffers
             marchingCubeCS.SetBuffer(0, "_VoxelsPos", voxelPositionsBuffer);
-            marchingCubeCS.SetBuffer(0, "_VoxelsVal", voxelValuesBuffer);
-            marchingCubeCS.SetBuffer(0, "_Vertices", vertexBuffer);
-            marchingCubeCS.SetBuffer(0, "_Triangles", triangleBuffer);
+            marchingCubeCS.SetBuffer(0, "_Voxels", voxelValuesBuffer);
+            marchingCubeCS.SetBuffer(0, "_Buffer", vertexBuffer);
             marchingCubeCS.SetBuffer(0, "_CubeEdgeFlags", cubeEdgeFlags);
             marchingCubeCS.SetBuffer(0, "_TriangleConnectionTable", triangleConnectionTable);
         }
