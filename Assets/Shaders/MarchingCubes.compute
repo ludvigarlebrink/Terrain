@@ -21,13 +21,13 @@ RWStructuredBuffer<Vert> _Buffer;
 
 static int directionSwapper = 0;
 
-// edgeConnection lists the index of the endpoint vertices for each of the 12 edges of the cube
+// edgeConnection lists the index of the endpoint vertices for each of the 12 edges of the cube.
 static int2 edgeConnection[12] =
 {
     int2(0,1), int2(1,2), int2(2,3), int2(3,0), int2(4,5), int2(5,6), int2(6,7), int2(7,4), int2(0,4), int2(1,5), int2(2,6), int2(3,7)
 };
 
-// edgeDirection lists the direction vector (vertex1-vertex0) for each edge in the cube
+// edgeDirection lists the direction vector (vertex1-vertex0) for each edge in the cube.
 static float3 edgeDirection[12] =
 {
     float3(1.0f, 0.0f, 0.0f),float3(0.0f, 1.0f, 0.0f),float3(-1.0f, 0.0f, 0.0f),float3(0.0f, -1.0f, 0.0f),
@@ -35,7 +35,7 @@ static float3 edgeDirection[12] =
     float3(0.0f, 0.0f, 1.0f),float3(0.0f, 0.0f, 1.0f),float3(0.0f, 0.0f, 1.0f),float3(0.0f,  0.0f, 1.0f)
 };
 
-// vertexOffset lists the positions, relative to vertex0, of each of the 8 vertices of a cube
+// vertexOffset lists the positions, relative to vertex0, of each of the 8 vertices of a cube.
 static float3 vertexOffset[8] =
 {
     float3(0, 0, 0),float3(1, 0, 0),float3(1, 1, 0),float3(0, 1, 0),
@@ -56,7 +56,7 @@ void FillCube(int x, int y, int z, out float cube[8])
 }
 
 // GetOffset finds the approximate point of intersection of the surface
-// between two points with the values v1 and v2
+// between two points with the values v1 and v2.
 float GetOffset(float v1, float v2)
 {
     float delta = v2 - v1;
@@ -89,12 +89,23 @@ Vert CreateVertex(float3 position, float3 centre)
 [numthreads(8, 8, 8)]
 void CSMain(int3 id : SV_DispatchThreadID)
 {
-    //Dont generate verts at the edge as they dont have 
-    //neighbours to make a cube from and the normal will 
-    //not be correct around border.
-    if (id.x >= _Width - 1 - _Border) return;
-    if (id.y >= _Height - 1 - _Border) return;
-    if (id.z >= _Depth - 1 - _Border) return;
+    // Don't generate vertices at the edge as they dont have 
+    // neighbours to make a cube from and the normal will 
+    // not be correct around border.
+    if (id.x >= _Width - 1 - _Border){
+    
+        return;
+    }
+
+    if (id.y >= _Height - 1 - _Border){
+
+        return;
+    }
+
+    if (id.z >= _Depth - 1 - _Border)
+    {
+        return;
+    }
 
     float3 pos = float3(id);
     float3 centre = float3(_Width, 0, _Depth) / 2.0;
@@ -108,13 +119,21 @@ void CSMain(int3 id : SV_DispatchThreadID)
 
     // Find which vertices are inside of the surface and which are outside.
     for (i = 0; i < 8; i++)
-        if (cube[i] <= _Isolevel) cubeIndex |= 1 << i;
+    {
+        if (cube[i] <= _Isolevel) {
+
+            cubeIndex |= 1 << i;
+        }
+    }
 
     // Find which edges are intersected by the surface.
     int edgeFlags = _CubeEdgeFlags[cubeIndex];
 
     // If there are no connections, simply return.
-    if (edgeFlags == 0) return;
+    if (edgeFlags == 0)
+    {
+        return;
+    }
 
     // Find the point of intersection of the surface with each edge.
     for (i = 0; i < 12; i++)
@@ -123,7 +142,8 @@ void CSMain(int3 id : SV_DispatchThreadID)
         if ((edgeFlags & (1 << i)) != 0)
         {
             float offset = GetOffset(cube[edgeConnection[i].x], cube[edgeConnection[i].y]);
-            vertexList[i] = pos + (vertexOffset[edgeConnection[i].x] + offset * edgeDirection[i]);
+            vertexList[i].x = lerp(_VoxelsPos[cube[edgeConnection[i].x].x, _VoxelsPos[cube[edgeConnection[i].y].x, offset);
+            //vertexList[i] = pos + (vertexOffset[edgeConnection[i].x] + offset * edgeDirection[i]);
         }
     }
 
@@ -131,10 +151,10 @@ void CSMain(int3 id : SV_DispatchThreadID)
 
     int idx = id.x + id.y * _Width + id.z * _Width * _Height;
 
-    //Save the triangles that were found. There can be up to five per cube
+    // Save the triangles that were found. There can be up to five per cube.
     for (i = 0; i < 5; i++)
     {
-        //If the connection table is not -1 then this a triangle.
+        // If the connection table is not -1 then this a triangle.
         if (_TriangleConnectionTable[cubeIndex * 16 + 3 * i] >= 0)
         {
             float3 position;
