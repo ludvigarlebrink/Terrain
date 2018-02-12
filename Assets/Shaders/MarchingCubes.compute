@@ -6,7 +6,7 @@ struct Vert
     float2 uv;
 };
 
-float _Target;
+float _Isolevel;
 
 int _Width, _Height, _Depth, _Border;
 
@@ -60,10 +60,10 @@ void FillCube(int x, int y, int z, out float cube[8])
 float GetOffset(float v1, float v2)
 {
     float delta = v2 - v1;
-    return (delta == 0.0f) ? 0.5f : (_Target - v1) / delta;
+    return (delta == 0.0f) ? 0.5f : (_Isolevel - v1) / delta;
 }
 
-Vert CreateVertex(float3 position, float3 centre, float3 size)
+Vert CreateVertex(float3 position, float3 centre)
 {
     Vert vert;
     vert.position = float4(position - centre, 1.0);
@@ -103,27 +103,27 @@ void CSMain(int3 id : SV_DispatchThreadID)
     FillCube(id.x, id.y, id.z, cube);
 
     int i = 0;
-    int flagIndex = 0;
-    float3 edgeVertex[12];
+    int cubeIndex = 0;
+    float3 vertexList[12];
 
-    //Find which vertices are inside of the surface and which are outside
+    // Find which vertices are inside of the surface and which are outside.
     for (i = 0; i < 8; i++)
-        if (cube[i] <= _Target) flagIndex |= 1 << i;
+        if (cube[i] <= _Isolevel) cubeIndex |= 1 << i;
 
-    //Find which edges are intersected by the surface
-    int edgeFlags = _CubeEdgeFlags[flagIndex];
+    // Find which edges are intersected by the surface.
+    int edgeFlags = _CubeEdgeFlags[cubeIndex];
 
-    // no connections, return
+    // If there are no connections, simply return.
     if (edgeFlags == 0) return;
 
-    //Find the point of intersection of the surface with each edge
+    // Find the point of intersection of the surface with each edge.
     for (i = 0; i < 12; i++)
     {
-        //if there is an intersection on this edge
+        // Check if there is an intersection on this edge. 
         if ((edgeFlags & (1 << i)) != 0)
         {
             float offset = GetOffset(cube[edgeConnection[i].x], cube[edgeConnection[i].y]);
-            edgeVertex[i] = pos + (vertexOffset[edgeConnection[i].x] + offset * edgeDirection[i]);
+            vertexList[i] = pos + (vertexOffset[edgeConnection[i].x] + offset * edgeDirection[i]);
         }
     }
 
@@ -135,18 +135,18 @@ void CSMain(int3 id : SV_DispatchThreadID)
     for (i = 0; i < 5; i++)
     {
         //If the connection table is not -1 then this a triangle.
-        if (_TriangleConnectionTable[flagIndex * 16 + 3 * i] >= 0)
+        if (_TriangleConnectionTable[cubeIndex * 16 + 3 * i] >= 0)
         {
             float3 position;
 
-            position = edgeVertex[_TriangleConnectionTable[flagIndex * 16 + (3 * i + 0)]];
-            _Buffer[idx * 15 + (3 * i + 0)] = CreateVertex(position, centre, size);
+            position = vertexList[_TriangleConnectionTable[cubeIndex * 16 + (3 * i + 0)]];
+            _Buffer[idx * 15 + (3 * i + 0)] = CreateVertex(position, centre);
 
-            position = edgeVertex[_TriangleConnectionTable[flagIndex * 16 + (3 * i + 1)]];
-            _Buffer[idx * 15 + (3 * i + 1)] = CreateVertex(position, centre, size);
+            position = vertexList[_TriangleConnectionTable[cubeIndex * 16 + (3 * i + 1)]];
+            _Buffer[idx * 15 + (3 * i + 1)] = CreateVertex(position, centre);
 
-            position = edgeVertex[_TriangleConnectionTable[flagIndex * 16 + (3 * i + 2)]];
-            _Buffer[idx * 15 + (3 * i + 2)] = CreateVertex(position, centre, size);
+            position = vertexList[_TriangleConnectionTable[cubeIndex * 16 + (3 * i + 2)]];
+            _Buffer[idx * 15 + (3 * i + 2)] = CreateVertex(position, centre);
         }
     }
 

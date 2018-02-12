@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
 namespace Name.Terrain
 {
     struct Vert
@@ -115,10 +114,10 @@ namespace Name.Terrain
                             cubeIndex |= storedScalars[j] < isolevel ? resolutions[j] : 0;
                         }
 
-                        int bits = Terrain3DTables.EdgeTable[cubeIndex];
+                        int edgeFlags = Terrain3DTables.EdgeTable[cubeIndex];
 
                         // If no edges are crossed, continue to the next iteration.
-                        if (bits == 0)
+                        if (edgeFlags == 0)
                         {
                             continue;
                         }
@@ -127,12 +126,12 @@ namespace Name.Terrain
                         int resValue = 1;
 
                         // Check which edges are crossed and estimate the point location with a weighted average of scalar values at edge endpoints. 
-                        // Cases 1 - 8          Horizontal edges at bottom of the cube
-                        // Cases 16 - 128       Horizontal edges at top of the cube
-                        // Cases 256 - 2048     Vertical edges of the cubes
+                        // 1 - 8          Horizontal edges at bottom of the cube
+                        // 16 - 128       Horizontal edges at top of the cube
+                        // 256 - 2048     Vertical edges of the cubes
                         for (int index = 0; index < 12; ++index)
                         {
-                            if ((bits & resValue) != 0)
+                            if ((edgeFlags & resValue) != 0)
                             {
                                 alpha = (isolevel - storedScalars[(int)vertPoint[index].y]) / (storedScalars[(int)vertPoint[index].x] - storedScalars[(int)vertPoint[index].y]);
                                 vertexList[index] = Vector3.Lerp(voxels[(int)basePoints[(int)vertPoint[index].z]].position, voxels[(int)basePoints[(int)vertPoint[index].w]].position, alpha);
@@ -157,7 +156,7 @@ namespace Name.Terrain
                             triangles.Add(vertexIndex);
                             triangles.Add(vertexIndex + 1);
                             triangles.Add(vertexIndex + 2);
-
+                            
                             directionSwapper = 1 - directionSwapper;
 
                             if (directionSwapper == 0)
@@ -197,9 +196,7 @@ namespace Name.Terrain
 
             ReadBackMesh(vertexBuffer);
         }
-        #endregion
 
-        #region Private Methods
         public void Initialize()
         {
             multiplier = (int)(axisMax / size);
@@ -248,7 +245,7 @@ namespace Name.Terrain
 
             // InitializeComputeResources();
         }
-        
+
         public void Deallocate()
         {
             cubeEdgeFlags.Release();
@@ -258,6 +255,9 @@ namespace Name.Terrain
             voxelPositionsBuffer.Release();
             voxelValuesBuffer.Release();
         }
+        #endregion
+
+        #region Private Methods
 
         private void InitializeComputeResources()
         {
@@ -305,9 +305,7 @@ namespace Name.Terrain
             marchingCubeCS.SetInt("_Height", size);
             marchingCubeCS.SetInt("_Depth", size);
             marchingCubeCS.SetInt("_Border", 1);
-            marchingCubeCS.SetFloat("_Target", 0.0f);
-
-            marchingCubeCS.SetVectorArray("_VertPoint", vertPoint);
+            marchingCubeCS.SetFloat("_Isolevel", 0.0f);
 
             // Set buffers
             marchingCubeCS.SetBuffer(0, "_VoxelsPos", voxelPositionsBuffer);
@@ -401,11 +399,11 @@ namespace Name.Terrain
             triangles.Clear();
         }
 
-        void ReadBackMesh(ComputeBuffer meshBuffer)
+        void ReadBackMesh(ComputeBuffer buffer)
         {
             // Get the data out of the vertex buffer
             Vert[] verts = new Vert[vertexBufferSize];
-            vertexBuffer.GetData(verts);
+            buffer.GetData(verts);
 
             int idx = 0;
 
@@ -426,7 +424,6 @@ namespace Name.Terrain
             // Clear lists
             ClearLists();
         }
-
         #endregion
     }
 }
