@@ -38,11 +38,43 @@ namespace NameEditor.Terrain
             falloff = EditorGUILayout.Slider("Falloff", size, 0.0f, 200.0f);
         }
 
+        public void DrawBrush()
+        {
+            // Cast a ray through a screen point and return the hit point.
+            Camera cam = Camera.current;
+            if (!cam)
+            {
+                return;
+            }
+
+            SceneView sceneView = SceneView.currentDrawingSceneView;
+            if (!sceneView)
+            {
+                return;
+            }
+
+            Event e = Event.current;
+
+            Vector3 mousePosition = e.mousePosition;
+            mousePosition.y = sceneView.camera.pixelHeight - e.mousePosition.y;
+
+
+            Ray ray = cam.ScreenPointToRay(mousePosition);
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
+            {
+                float length = (cam.transform.position - hit.point).magnitude / 30.0f;
+                Handles.color = Color.blue;
+                Handles.DrawLine(hit.point, hit.point + hit.normal * length);
+                Handles.CircleHandleCap(0, hit.point, Quaternion.LookRotation(hit.normal), 5.0f, EventType.Repaint);
+            }
+        }
+
         public BrushHit[] Paint(Terrain3D terrain3D)
         {
             List<BrushHit> brushHits = new List<BrushHit>();
 
-            // Cast a ray through a screen point and return the hit point
+            // Cast a ray through a screen point and return the hit point.
             Camera cam = Camera.current;
             if (!cam)
             {
@@ -64,6 +96,11 @@ namespace NameEditor.Terrain
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit, Mathf.Infinity))
             {
+                float length = (cam.transform.position - hit.point).magnitude / 30.0f;
+                Handles.color = Color.blue;
+                Handles.DrawLine(hit.point, hit.point + hit.normal * length);
+                Handles.CircleHandleCap(0, hit.point, Quaternion.LookRotation(hit.normal), 5.0f, EventType.Repaint);
+
                 // Transform the hit point from world space to local space
                 Vector3 localHit = terrain3D.transform.InverseTransformPoint(hit.point);
                 TerrainChunk chunk = terrain3D.terrainChunk;
