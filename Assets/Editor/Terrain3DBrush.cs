@@ -38,6 +38,35 @@ namespace NameEditor.Terrain
             falloff = EditorGUILayout.Slider("Falloff", size, 0.0f, 200.0f);
         }
 
+        public void DrawBrush()
+        {
+            // Cast a ray through a screen point and return the hit point
+            Camera cam = Camera.current;
+            if (!cam)
+            {
+                return;
+            }
+
+            SceneView sceneView = SceneView.currentDrawingSceneView;
+            if (!sceneView)
+            {
+                return;
+            }
+
+            Event e = Event.current;
+
+            Vector3 mousePosition = e.mousePosition;
+            mousePosition.y = sceneView.camera.pixelHeight - e.mousePosition.y;
+
+            Ray ray = cam.ScreenPointToRay(mousePosition);
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
+            {
+                Handles.color = Color.blue;
+                Handles.DrawLine(hit.point, hit.point + hit.normal);
+            }
+        }
+
         public BrushHit[] Paint(Terrain3D terrain3D)
         {
             List<BrushHit> brushHits = new List<BrushHit>();
@@ -64,6 +93,8 @@ namespace NameEditor.Terrain
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit, Mathf.Infinity))
             {
+                Handles.DrawLine(hit.point, hit.point + hit.normal);
+
                 // Transform the hit point from world space to local space
                 Vector3 localHit = terrain3D.transform.InverseTransformPoint(hit.point);
                 TerrainChunk chunk = terrain3D.terrainChunk;

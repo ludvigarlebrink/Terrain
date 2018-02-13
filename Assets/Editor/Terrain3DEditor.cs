@@ -140,6 +140,8 @@ namespace NameEditor.Terrain
                 default:
                     break;
             }
+
+            SceneView.RepaintAll();
         }
 
         [MenuItem("GameObject/Create Other/Terrain3D")]

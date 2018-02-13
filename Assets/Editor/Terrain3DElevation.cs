@@ -96,6 +96,10 @@ namespace NameEditor.Terrain
 
                 terrain3D.Refresh();
             }
+            else
+            {
+                brush.DrawBrush();
+            }
         }
     }
 }
