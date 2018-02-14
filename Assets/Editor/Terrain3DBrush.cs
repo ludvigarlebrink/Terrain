@@ -29,13 +29,31 @@ namespace NameEditor.Terrain
         public float falloff = 10.0f;
         #endregion
 
+        #region Private Variables
+
+        RaycastHit hitPoint;
+        #endregion
+
         #region Public Methods
+        public float Size
+        {
+            get
+            {
+                return size;
+            }
+
+            set
+            {
+                this.size = value;
+            }
+        }
+
         public void DrawInspector()
         {
             EditorGUILayout.LabelField("Brush", EditorStyles.boldLabel);
             strength = EditorGUILayout.Slider("Strength", strength, 0.0f, 100.0f);
             size = EditorGUILayout.Slider("Size", size, 0.0f, 200.0f);
-            falloff = EditorGUILayout.Slider("Falloff", size, 0.0f, 200.0f);
+            falloff = EditorGUILayout.Slider("Falloff", falloff, 0.0f, 200.0f);
         }
 
         public void DrawBrush()
@@ -58,7 +76,6 @@ namespace NameEditor.Terrain
             Vector3 mousePosition = e.mousePosition;
             mousePosition.y = sceneView.camera.pixelHeight - e.mousePosition.y;
 
-
             Ray ray = cam.ScreenPointToRay(mousePosition);
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit, Mathf.Infinity))
@@ -66,8 +83,27 @@ namespace NameEditor.Terrain
                 float length = (cam.transform.position - hit.point).magnitude / 30.0f;
                 Handles.color = Color.blue;
                 Handles.DrawLine(hit.point, hit.point + hit.normal * length);
-                Handles.CircleHandleCap(0, hit.point, Quaternion.LookRotation(hit.normal), 5.0f, EventType.Repaint);
+                Handles.CircleHandleCap(0, hit.point, Quaternion.LookRotation(hit.normal), size + 5.0f, EventType.Repaint);
+                Handles.CircleHandleCap(0, hit.point, Quaternion.LookRotation(hit.normal), size + falloff, EventType.Repaint);
+                hitPoint = hit;
             }
+        }
+
+        public void DrawPrevious()
+        {
+            Camera cam = Camera.current;
+            if (!cam)
+            {
+                return;
+            }
+
+            float length = (cam.transform.position - hitPoint.point).magnitude / 30.0f;
+            Handles.color = Color.blue;
+            Handles.DrawLine(hitPoint.point, hitPoint.point + hitPoint.normal * length);
+            Handles.CircleHandleCap(0, hitPoint.point, Quaternion.LookRotation(hitPoint.normal), size + 5.0f, EventType.Repaint);
+            Handles.CircleHandleCap(0, hitPoint.point, Quaternion.LookRotation(hitPoint.normal), size + falloff, EventType.Repaint);
+
+
         }
 
         public BrushHit[] Paint(Terrain3D terrain3D)
@@ -99,7 +135,8 @@ namespace NameEditor.Terrain
                 float length = (cam.transform.position - hit.point).magnitude / 30.0f;
                 Handles.color = Color.blue;
                 Handles.DrawLine(hit.point, hit.point + hit.normal * length);
-                Handles.CircleHandleCap(0, hit.point, Quaternion.LookRotation(hit.normal), 5.0f, EventType.Repaint);
+                Handles.CircleHandleCap(0, hit.point, Quaternion.LookRotation(hit.normal), size + 5.0f, EventType.Repaint);
+                Handles.CircleHandleCap(0, hit.point, Quaternion.LookRotation(hit.normal), size + falloff, EventType.Repaint);
 
                 // Transform the hit point from world space to local space
                 Vector3 localHit = terrain3D.transform.InverseTransformPoint(hit.point);
