@@ -83,7 +83,7 @@ namespace NameEditor.Terrain
                 float length = (cam.transform.position - hit.point).magnitude / 30.0f;
                 Handles.color = Color.blue;
                 Handles.DrawLine(hit.point, hit.point + hit.normal * length);
-                Handles.CircleHandleCap(0, hit.point, Quaternion.LookRotation(hit.normal), size + 5.0f, EventType.Repaint);
+                Handles.CircleHandleCap(0, hit.point, Quaternion.LookRotation(hit.normal), size, EventType.Repaint);
                 Handles.CircleHandleCap(0, hit.point, Quaternion.LookRotation(hit.normal), size + falloff, EventType.Repaint);
                 hitPoint = hit;
             }

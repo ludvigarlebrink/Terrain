@@ -79,7 +79,7 @@ namespace NameEditor.Terrain
 
             if ((e.type == EventType.KeyDown) && e.keyCode == (KeyCode.B))
             {
-               isButtonIsDown = true;
+                isButtonIsDown = true;
                 GUIUtility.hotControl = 0;
             }
 
@@ -110,7 +110,7 @@ namespace NameEditor.Terrain
                     brush.Size += xMovement / 3;
                 }
 
-                
+
             }
 
             if (isMouseIsDown)
@@ -126,7 +126,8 @@ namespace NameEditor.Terrain
             }
             else
             {
-                if (!isButtonIsDown) { 
+                if (!isButtonIsDown)
+                {
                     brush.DrawBrush();
                 }
                 else
