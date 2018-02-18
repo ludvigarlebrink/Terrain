@@ -1,35 +1,43 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Name.Lod
 {
-
-    public class Instantiation : MonoBehaviour
+    public class LODManager : MonoBehaviour
     {
 
         #region Public Variables
         public int width = 5;
         public int depth = 5;
         public float spacing = 2.0f;
+        public float speed = 2.0f;
         public GameObject LODObject;
         public Transform Camera;
-        public float speed = 2.0f;
         public Transform CameraPathHolder;
         public Transform Target;
+        public Text buttonText;
         #endregion
 
         #region Private Variables
         private int index;
         private int visited;
         private Transform targetPoint;
-        private bool isTestIsRunning;
+        private static string[] text = { "Start Test", "Stop Test" };
+        private bool isTestIsRunning = false;
         #endregion
 
         #region Public Functions
-        public void RunTest(bool status)
+        public void RunTest()
         {
-            isTestIsRunning = status;
+            isTestIsRunning = !isTestIsRunning;
+            buttonText.text = text[isTestIsRunning ? 1 : 0];
+
+            if (isTestIsRunning == false)
+            {
+                ResetTest();
+            }
         }
 
         public void ToggleLOD()
@@ -46,14 +54,18 @@ namespace Name.Lod
         #endregion
 
         #region Private Functions
-        private void Start()
+        private void ResetTest()
         {
-
             index = 0;
             visited = 0;
-            targetPoint = CameraPathHolder.GetChild(index);
+            targetPoint = CameraPathHolder.GetChild(0);
             Camera.position = targetPoint.position;
             Camera.LookAt(Target);
+        }
+
+        private void Start()
+        {
+            ResetTest();
 
             for (int x = 0; x < width; ++x)
             {
@@ -71,8 +83,8 @@ namespace Name.Lod
             if (visited == CameraPathHolder.childCount + 1)
             {
                 isTestIsRunning = false;
-                visited = 0;
-                index = 0;
+                buttonText.text = text[isTestIsRunning ? 1 : 0];
+                ResetTest();
             }
 
             if (isTestIsRunning)
@@ -90,7 +102,6 @@ namespace Name.Lod
                 }
             }
         }
-
         #endregion
     }
 

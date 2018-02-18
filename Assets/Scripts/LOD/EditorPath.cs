@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 
 namespace Name.Lod
 {
@@ -9,19 +10,22 @@ namespace Name.Lod
     {
         #region Public Variables
         public Color rayColor = Color.white;
-        public Color sphereColor = Color.green;
+        public Color sphereColor = Color.white;
+        public Color labelColor = Color.green;
         public float sphereRadius = 5.0f;
         public List<Transform> path_objs = new List<Transform>();
         #endregion
 
         #region Private Variables
         private Transform[] transformArray;
+        private GUIStyle style = new GUIStyle();
         #endregion
 
         #region Private Functions
         private void OnDrawGizmos()
         {
-            Gizmos.color = rayColor;
+            style.normal.textColor = labelColor;
+            style.fontSize = 20;
             transformArray = GetComponentsInChildren<Transform>();
             path_objs.Clear();
 
@@ -40,9 +44,12 @@ namespace Name.Lod
                 from = path_objs[a].position;
                 to = path_objs[(a + 1) % path_objs.Count].position;
                 Gizmos.color = sphereColor;
-                Gizmos.DrawSphere(from, sphereRadius);
+                Gizmos.DrawWireSphere(from, sphereRadius);
                 Gizmos.color = rayColor;
                 Gizmos.DrawLine(from, to);
+                from.y += 20.0f;
+                Handles.Label(from, "" + a, style);
+
             }
         }
         #endregion

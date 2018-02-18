@@ -2,68 +2,80 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FPSCounter : MonoBehaviour
+namespace Name.UI
 {
 
-    public int AverageFPS { get; private set; }
-    public int frameRange = 60;
-
-    public int HighestFPS { get; private set; }
-    public int LowestFPS { get; private set; }
-
-    int[] fpsBuffer;
-    int fpsBufferIndex;
-
-    public void InitializeBuffer()
+    public class FPSCounter : MonoBehaviour
     {
-        if (frameRange <= 0)
-        {
-            frameRange = 1;
-        }
-        fpsBuffer = new int[frameRange];
-        fpsBufferIndex = 0;
-    }
+        #region Public Variables
+        public int AverageFPS { get; private set; }
+        public int frameRange = 60;
 
-    private void UpdateBuffer()
-    {
-        fpsBuffer[fpsBufferIndex++] = (int)(1f / Time.unscaledDeltaTime);
-        if (fpsBufferIndex >= frameRange)
+        public int HighestFPS { get; private set; }
+        public int LowestFPS { get; private set; }
+        #endregion
+
+        #region Private Variables
+        private int[] fpsBuffer;
+        private int fpsBufferIndex;
+        #endregion
+
+        #region Public Functions
+        public void InitializeBuffer()
         {
+            if (frameRange <= 0)
+            {
+                frameRange = 1;
+            }
+            fpsBuffer = new int[frameRange];
             fpsBufferIndex = 0;
         }
-    }
+        #endregion
 
-    private void CalculateFPS()
-    {
-        int sum = 0;
-        int highest = 0;
-        int lowest = int.MaxValue;
-        for (int i = 0; i < frameRange; i++)
+        #region Private Functipns
+        private void UpdateBuffer()
         {
-            int fps = fpsBuffer[i];
-            sum += fps;
-            if (fps > highest)
+            fpsBuffer[fpsBufferIndex++] = (int)(1f / Time.unscaledDeltaTime);
+            if (fpsBufferIndex >= frameRange)
             {
-                highest = fps;
-            }
-            if (fps < lowest)
-            {
-                lowest = fps;
+                fpsBufferIndex = 0;
             }
         }
-        AverageFPS = sum / frameRange;
-        HighestFPS = highest;
-        LowestFPS = lowest;
-    }
 
-    private void Update()
-    {
-        if (fpsBuffer == null || fpsBuffer.Length != frameRange)
+        private void CalculateFPS()
         {
-            InitializeBuffer();
+            int sum = 0;
+            int highest = 0;
+            int lowest = int.MaxValue;
+            for (int i = 0; i < frameRange; i++)
+            {
+                int fps = fpsBuffer[i];
+                sum += fps;
+                if (fps > highest)
+                {
+                    highest = fps;
+                }
+                if (fps < lowest)
+                {
+                    lowest = fps;
+                }
+            }
+            AverageFPS = sum / frameRange;
+            HighestFPS = highest;
+            LowestFPS = lowest;
         }
 
-        UpdateBuffer();
-        CalculateFPS();
+        private void Update()
+        {
+            if (fpsBuffer == null || fpsBuffer.Length != frameRange)
+            {
+                InitializeBuffer();
+            }
+
+            UpdateBuffer();
+            CalculateFPS();
+        }
+        #endregion
     }
+
 }

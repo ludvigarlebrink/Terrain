@@ -3,27 +3,22 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(FPSCounter))]
-public class FPSDisplay : MonoBehaviour
+namespace Name.UI
 {
 
-    [System.Serializable]
-    private struct FPSColor
+    [RequireComponent(typeof(FPSCounter))]
+    public class FPSDisplay : MonoBehaviour
     {
-        public Color color;
-        public int minimumFPS;
-    }
+        #region Public Variables
+        public Text highestFPSLabel;
+        public Text averageFPSLabel;
+        public Text lowestFPSLabel;
+        #endregion
 
-    [SerializeField]
-    private FPSColor[] coloring;
+        #region Private Variables
+        private FPSCounter fpsCounter;
 
-    public Text highestFPSLabel;
-    public Text averageFPSLabel;
-    public Text lowestFPSLabel;
-
-    FPSCounter fpsCounter;
-
-    static string[] stringsFrom00To99 = {
+        private static string[] stringsFrom00To99 = {
         "00", "01", "02", "03", "04", "05", "06", "07", "08", "09",
         "10", "11", "12", "13", "14", "15", "16", "17", "18", "19",
         "20", "21", "22", "23", "24", "25", "26", "27", "28", "29",
@@ -36,28 +31,45 @@ public class FPSDisplay : MonoBehaviour
         "90", "91", "92", "93", "94", "95", "96", "97", "98", "99"
     };
 
-    void Awake()
-    {
-        fpsCounter = GetComponent<FPSCounter>();
-    }
-
-    void Display(Text label, int fps)
-    {
-        label.text = stringsFrom00To99[Mathf.Clamp(fps, 0, 99)];
-        for (int i = 0; i < coloring.Length; i++)
+        [System.Serializable]
+        private struct FPSColor
         {
-            if (fps >= coloring[i].minimumFPS)
+            public Color color;
+            public int minimumFPS;
+        }
+
+        [SerializeField]
+        private FPSColor[] coloring;
+        #endregion
+
+        #region Public Functions
+        public void Display(Text label, int fps)
+        {
+            label.text = stringsFrom00To99[Mathf.Clamp(fps, 0, 99)];
+            for (int i = 0; i < coloring.Length; i++)
             {
-                label.color = coloring[i].color;
-                break;
+                if (fps >= coloring[i].minimumFPS)
+                {
+                    label.color = coloring[i].color;
+                    break;
+                }
             }
         }
+        #endregion
+
+        #region Private Functions
+        private void Awake()
+        {
+            fpsCounter = GetComponent<FPSCounter>();
+        }
+
+        private void Update()
+        {
+            Display(highestFPSLabel, fpsCounter.HighestFPS);
+            Display(averageFPSLabel, fpsCounter.AverageFPS);
+            Display(lowestFPSLabel, fpsCounter.LowestFPS);
+        }
+        #endregion
     }
 
-    void Update()
-    {
-        Display(highestFPSLabel, fpsCounter.HighestFPS);
-        Display(averageFPSLabel, fpsCounter.AverageFPS);
-        Display(lowestFPSLabel, fpsCounter.LowestFPS);
-    }
 }
