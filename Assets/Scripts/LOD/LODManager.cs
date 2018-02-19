@@ -9,23 +9,24 @@ namespace Name.Lod
     {
 
         #region Public Variables
-        public int width = 5;
-        public int depth = 5;
-        public float spacing = 2.0f;
+        public int xSize = 10;
+        public int ySize = 10;
+        public int zSize = 10;
+        public float spacing = 1.0f;
         public float speed = 2.0f;
-        public GameObject LODObject;
-        public Transform Camera;
-        public Transform CameraPathHolder;
-        public Transform Target;
-        public Text buttonText;
+        public GameObject lodObject = null;
+        public Transform cameraPathHolder = null;
+        public Transform target = null;
+        public Text buttonText = null;
         #endregion
 
         #region Private Variables
-        private int index;
-        private int visited;
+        private int index = -1;
+        private int visited = -1;
         private Transform targetPoint;
         private static string[] text = { "Start Test", "Stop Test" };
         private bool isTestIsRunning = false;
+        private Transform cam = null;
         #endregion
 
         #region Public Functions
@@ -54,33 +55,29 @@ namespace Name.Lod
         #endregion
 
         #region Private Functions
-        private void ResetTest()
-        {
-            index = 0;
-            visited = 0;
-            targetPoint = CameraPathHolder.GetChild(0);
-            Camera.position = targetPoint.position;
-            Camera.LookAt(Target);
-        }
-
         private void Start()
         {
+            cam = Camera.main.transform;
+
             ResetTest();
 
-            for (int x = 0; x < width; ++x)
-            {
-                for (int z = 0; z < depth; ++z)
-                {
-                    GameObject obj = Instantiate(LODObject, new Vector3(x * spacing, 0, z * spacing), Quaternion.identity) as GameObject;
-                    obj.transform.parent = gameObject.transform;
 
+            for (int x = 0; x < xSize; ++x)
+            {
+                for (int y = 0; y < ySize; ++y)
+                {
+                    for (int z = 0; z < zSize; ++z)
+                    {
+                        GameObject obj = Instantiate(lodObject, new Vector3(x * spacing, y * spacing, z * spacing), Quaternion.identity) as GameObject;
+                        obj.transform.parent = gameObject.transform;
+                    }
                 }
             }
         }
 
         private void Update()
         {
-            if (visited == CameraPathHolder.childCount + 1)
+            if (visited == cameraPathHolder.childCount + 1)
             {
                 isTestIsRunning = false;
                 buttonText.text = text[isTestIsRunning ? 1 : 0];
@@ -90,18 +87,28 @@ namespace Name.Lod
             if (isTestIsRunning)
             {
 
-                Camera.LookAt(Target);
-                Camera.position = Vector3.MoveTowards(Camera.position, targetPoint.position, speed * Time.deltaTime);
-                if (Vector3.Distance(Camera.position, targetPoint.position) < 0.1f)
+                cam.LookAt(target);
+                cam.position = Vector3.MoveTowards(cam.position, targetPoint.position, speed * Time.deltaTime);
+                if (Vector3.Distance(cam.position, targetPoint.position) < 0.1f)
                 {
 
                     visited++;
                     index++;
-                    index %= CameraPathHolder.childCount;
-                    targetPoint = CameraPathHolder.GetChild(index);
+                    index %= cameraPathHolder.childCount;
+                    targetPoint = cameraPathHolder.GetChild(index);
                 }
             }
         }
+
+        private void ResetTest()
+        {
+            index = 0;
+            visited = 0;
+            targetPoint = cameraPathHolder.GetChild(0);
+            cam.position = targetPoint.position;
+            cam.LookAt(target);
+        }
+
         #endregion
     }
 
