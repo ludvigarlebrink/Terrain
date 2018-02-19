@@ -8,6 +8,9 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/TestSceneLudvig.unity
     guid: 787d03c6173cc4449a452652d10407f3
+  - enabled: 0
+    path: 
+    guid: 00000000000000000000000000000000
   - enabled: 1
-    path: Assets/Scenes/LODTest.unity
-    guid: 0a96b46d3ae1c3345bdbc05c84261794
+    path: Assets/Scenes/LODTestLA.unity
+    guid: ac1678aa5f68cfc408126aa09890c74c

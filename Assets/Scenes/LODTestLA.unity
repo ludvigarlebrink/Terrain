@@ -479,7 +479,7 @@ MonoBehaviour:
   lod2: 0.125
   lod3: 0.075
   lod4: 0.01
-  delay: 1
+  delay: 10
   spacing: 0.5
   speed: 2
   xSize: 20
