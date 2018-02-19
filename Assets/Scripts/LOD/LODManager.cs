@@ -209,14 +209,14 @@ namespace Name.Lod
                 Destroy(transform.GetChild(i).gameObject);
             }
 
+            // Collect garbage.
+            GC.Collect();
+
             if (currentMode == TestMode.EmptyScene)
             {
                 initialized = true;
                 return;
             }
-
-            // Collect garbage.
-            GC.Collect();
 
             for (int x = 0; x < xSize; ++x)
             {
@@ -383,15 +383,15 @@ namespace Name.Lod
 
             // Test time.
             text += "Test time:                  ";
-            text += data.testTime.ToString() + " s\n";
+            text += data.testTime.ToString() + "s\n";
 
             // Frame time.
             text += "Average frame time:         ";
-            text += ((data.frameTime / data.numFrames) * 1000).ToString() + " ms\n";
+            text += ((data.frameTime / data.numFrames) * 1000).ToString() + "ms\n";
             text += "Best frame time:            ";
-            text += (data.bestFrameTime * 1000.0f).ToString() + " ms\n";
+            text += (data.bestFrameTime * 1000.0f).ToString() + "ms\n";
             text += "Worst frame time:           ";
-            text += (data.worstFrameTime * 1000.0f).ToString() + " ms\n";
+            text += (data.worstFrameTime * 1000.0f).ToString() + "ms\n";
             text += "Number of frames:           ";
             text += data.numFrames.ToString() + "\n";
             text += "Number Frames under 60:     ";
@@ -409,11 +409,11 @@ namespace Name.Lod
 
             // Memory.
             text += "Average memory:             ";
-            text += (data.totalMemory / data.numFrames).ToString() + " bytes\n";
+            text += (data.totalMemory / data.numFrames).ToString() + "bytes\n";
             text += "Highest memory used:        ";
-            text += data.highestMemory.ToString() + " bytes\n";
+            text += data.highestMemory.ToString() + "bytes\n";
             text += "Lowest memory used:         ";
-            text += data.lowestMemory.ToString() + " bytes\n";
+            text += data.lowestMemory.ToString() + "bytes\n";
             return text;
         }
         #endregion
