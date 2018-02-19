@@ -19,6 +19,9 @@ namespace NameEditor.Terrain
         private int selectedElevationTool = 0;
 
         bool isMouseIsDown = false;
+        bool isButtonIsDown = false;
+        Vector3 currentMousePosition = Vector3.zero;
+        Vector3 oldMousePosition = Vector2.zero;
 
         private Terrain3DBrush brush = new Terrain3DBrush();
         #endregion
@@ -74,6 +77,17 @@ namespace NameEditor.Terrain
         {
             Event e = Event.current;
 
+            if ((e.type == EventType.KeyDown) && e.keyCode == (KeyCode.B))
+            {
+                isButtonIsDown = true;
+                GUIUtility.hotControl = 0;
+            }
+
+            if ((e.type == EventType.KeyUp) && e.keyCode == (KeyCode.B))
+            {
+                isButtonIsDown = false;
+            }
+
             if ((e.type == EventType.MouseDown) && e.button == 0)
             {
                 isMouseIsDown = true;
@@ -83,6 +97,20 @@ namespace NameEditor.Terrain
             if (((e.type == EventType.MouseUp) && e.button == 0) || e.alt)
             {
                 isMouseIsDown = false;
+            }
+
+            if (isButtonIsDown)
+            {
+                Vector3 currentMousePosition = Event.current.mousePosition;
+                float xMovement = oldMousePosition.x - currentMousePosition.x;
+                oldMousePosition = currentMousePosition;
+
+                if (xMovement != 0.0f)
+                {
+                    brush.Size += xMovement / 3;
+                }
+
+
             }
 
             if (isMouseIsDown)
@@ -95,6 +123,18 @@ namespace NameEditor.Terrain
                 }
 
                 terrain3D.Refresh();
+            }
+            else
+            {
+                if (!isButtonIsDown)
+                {
+                    brush.DrawBrush();
+                }
+                else
+                {
+                    brush.DrawPrevious();
+                }
+
             }
         }
     }
